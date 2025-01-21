@@ -114,4 +114,67 @@ your-app-name/
 ├── tailwind.config.js
 └── package.json
 
+// app/page.tsx (or pages/index.tsx if using the "pages" directory)
+"use client";
+
+import { FC } from "react";
+import { Card, CardContent, CardHeader } from "@shadcn/ui";
+import { Input } from "@shadcn/ui";
+import { Button } from "@shadcn/ui";
+
+const Dashboard: FC = () => {
+  return (
+    <div className="flex flex-col h-screen">
+      {/* Header */}
+      <header className="flex justify-between p-4 border-b">
+        <div>CRN Search</div>
+        <div>On click on submit Customer 360 view page</div>
+        <div>Profile Details</div>
+      </header>
+
+      {/* Body */}
+      <main className="flex flex-grow">
+        {/* Sidebar */}
+        <aside className="w-1/4 p-4 border-r">
+          <div className="mb-4">
+            Menu items Report / Downloads dynamically load access on basis of roles
+          </div>
+          <div className="mb-4">Reports</div>
+          <div>EOD Balance</div>
+        </aside>
+
+        {/* Main Content */}
+        <section className="flex flex-col flex-grow p-4">
+          {/* Widgets */}
+          <div className="flex justify-between mb-4 space-x-4">
+            <Card className="flex-1">
+              <CardHeader>Widgets</CardHeader>
+              <CardContent></CardContent>
+            </Card>
+            <Card className="flex-1">
+              <CardHeader>Widgets</CardHeader>
+              <CardContent></CardContent>
+            </Card>
+            <Card className="flex-1">
+              <CardHeader>Widgets</CardHeader>
+              <CardContent></CardContent>
+            </Card>
+          </div>
+
+          {/* Vertical Container */}
+          <div className="flex-grow border p-4">Vertical Container</div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="p-4 border-t text-center">
+        React JS - 19 | Next JS - 15 | ShadCN
+      </footer>
+    </div>
+  );
+};
+
+export default Dashboard;
+
+
 This setup mirrors the provided wireframe while adhering to modern development practices with React, Next.js, and ShadCN. Let me know if you’d like further customization!
