@@ -177,4 +177,69 @@ const Dashboard: FC = () => {
 export default Dashboard;
 
 
+// app/page.tsx (or pages/index.tsx if using "pages" directory)
+"use client";
+
+import { FC } from "react";
+import { Button } from "@shadcn/ui";
+import { Input } from "@shadcn/ui";
+
+const Dashboard: FC = () => {
+  return (
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <aside className="w-1/4 bg-blue-100 p-4">
+        <div className="font-bold text-lg mb-6">/thoughtworks</div>
+        <nav className="space-y-4">
+          <div>
+            <h3 className="font-semibold">My Apps</h3>
+            <ul className="ml-4 space-y-2">
+              <li className="text-blue-600">Work</li>
+              <li className="text-gray-600">Add section +</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-semibold">Notifications</h3>
+            <div className="ml-4">(1)</div>
+          </div>
+          <div>
+            <h3 className="font-semibold">Add Apps</h3>
+          </div>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-grow bg-white p-6">
+        {/* Header */}
+        <header className="flex justify-between items-center mb-6">
+          <Input
+            className="w-1/3"
+            placeholder="Search your apps"
+          />
+          <div className="flex items-center space-x-4">
+            <Button variant="outline">Sort</Button>
+            <div className="text-sm">
+              <div>Deepthi</div>
+              <div>Thoughtworks</div>
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <section>
+          <h2 className="text-lg font-semibold mb-4">My Apps</h2>
+          <div className="p-4 border rounded-lg">Work</div>
+          <Button className="mt-4">Add Section</Button>
+        </section>
+      </main>
+    </div>
+  );
+};
+
+export default Dashboard;
+
+
+
+
+
 This setup mirrors the provided wireframe while adhering to modern development practices with React, Next.js, and ShadCN. Let me know if you’d like further customization!
