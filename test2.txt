@@ -1,3 +1,159 @@
+To replicate the complete dashboard page shown in the image using ShadCN UI, React 19, and Next.js 15, I’ll provide a starting structure. The code will include components like cards, charts, and navigation. ShadCN provides a modern and accessible design system that integrates well with React.
+
+Here’s a step-by-step implementation plan:
+	1.	Install Dependencies
+Run the following command to set up your Next.js project with the required packages:
+
+npx create-next-app@15 dashboard --ts
+cd dashboard
+npm install @shadcn/ui @tanstack/react-query @nivo/line @headlessui/react clsx
+
+
+	2.	Create the Layout
+Here’s the basic structure for the page:
+
+Code: Complete Dashboard Page
+
+// app/layout.tsx
+import './globals.css';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body className="bg-gray-100 text-gray-900">
+        {children}
+      </body>
+    </html>
+  );
+}
+
+Code: Dashboard Page
+
+// app/page.tsx
+import React from 'react';
+import { Card } from '@shadcn/ui';
+import { ResponsiveLine } from '@nivo/line';
+
+export default function Dashboard() {
+  // Dummy data for charts
+  const lineChartData = [
+    {
+      id: 'Sales',
+      color: 'hsl(220, 70%, 50%)',
+      data: [
+        { x: 'Jan', y: 100 },
+        { x: 'Feb', y: 200 },
+        { x: 'Mar', y: 300 },
+        { x: 'Apr', y: 150 },
+        { x: 'May', y: 400 },
+      ],
+    },
+  ];
+
+  return (
+    <main className="p-6">
+      <div className="flex justify-between mb-4">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+          Settings
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Stats Cards */}
+        <Card className="p-4 shadow">
+          <h2 className="text-sm font-semibold">Sales Per Day</h2>
+          <p className="text-2xl font-bold">$4,230</p>
+          <p className="text-sm text-red-500">-3%</p>
+        </Card>
+
+        <Card className="p-4 shadow">
+          <h2 className="text-sm font-semibold">Customers</h2>
+          <p className="text-2xl font-bold">798</p>
+        </Card>
+
+        <Card className="p-4 shadow">
+          <h2 className="text-sm font-semibold">Traffic</h2>
+          <p className="text-2xl font-bold">486</p>
+        </Card>
+
+        <Card className="p-4 shadow">
+          <h2 className="text-sm font-semibold">Orders</h2>
+          <p className="text-2xl font-bold">7,115</p>
+        </Card>
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        <Card className="p-4 h-[300px] shadow">
+          <h2 className="text-sm font-semibold">Market Share</h2>
+          <ResponsiveLine
+            data={lineChartData}
+            margin={{ top: 20, right: 20, bottom: 50, left: 50 }}
+            xScale={{ type: 'point' }}
+            yScale={{
+              type: 'linear',
+              min: 'auto',
+              max: 'auto',
+              stacked: true,
+              reverse: false,
+            }}
+            axisBottom={{
+              tickSize: 5,
+              tickPadding: 5,
+              tickRotation: 0,
+              legend: 'Month',
+              legendOffset: 36,
+              legendPosition: 'middle',
+            }}
+            axisLeft={{
+              tickSize: 5,
+              tickPadding: 5,
+              tickRotation: 0,
+              legend: 'Revenue',
+              legendOffset: -40,
+              legendPosition: 'middle',
+            }}
+          />
+        </Card>
+
+        <Card className="p-4 h-[300px] shadow">
+          <h2 className="text-sm font-semibold">Traffic Source</h2>
+          <p>Pie chart or bar chart placeholder</p>
+        </Card>
+      </div>
+    </main>
+  );
+}
+
+Styling: Global Styles
+
+Create a globals.css file with basic styles.
+
+/* globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+Run the Project
+
+Start the development server:
+
+npm run dev
+
+This will provide a skeleton of the dashboard you want. You can add more components like modals, charts, and side navigation by extending this structure. Would you like help customizing specific sections?
+
+
+
+
 
 // app/page.tsx
 import React from 'react';
