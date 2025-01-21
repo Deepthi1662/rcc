@@ -1,0 +1,114 @@
+To create a UI using React 19, Next.js 15, and ShadCN (ShadUI), I’ll guide you through the implementation based on the wireframe provided in the image.
+
+Steps to Build the Application
+	1.	Set up the Next.js Project:
+	•	Run the following command to set up a Next.js app:
+
+npx create-next-app@latest your-app-name
+cd your-app-name
+npm install @shadcn/ui
+
+
+	2.	Install Required Dependencies:
+	•	Add dependencies for ShadCN and React:
+
+npm install tailwindcss postcss autoprefixer @shadcn/ui
+npx tailwindcss init
+
+
+	3.	Configure Tailwind CSS:
+	•	Update the tailwind.config.js file:
+
+module.exports = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@shadcn/ui/**/*.{js,ts,jsx,tsx}',
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+
+
+	4.	Create the Layout:
+	•	Implement the basic layout structure as per the wireframe:
+
+// components/Layout.js
+import { Card, Container, Navbar, Sidebar, Widget } from '@shadcn/ui';
+
+export default function Layout() {
+  return (
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <Sidebar className="w-1/4 bg-gray-800 text-white p-4">
+        <div className="space-y-4">
+          <div>CRN Search</div>
+          <div>Reports</div>
+          <div>EOD Balance</div>
+          <div>Downloads (Dynamic Role-based)</div>
+        </div>
+      </Sidebar>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Top Navbar */}
+        <Navbar className="bg-gray-200 p-4 flex justify-between">
+          <div>On click: Customer 360 View</div>
+          <div>Profile Details</div>
+        </Navbar>
+
+        {/* Widgets Section */}
+        <Container className="grid grid-cols-3 gap-4 p-4">
+          <Card>Widget 1</Card>
+          <Card>Widget 2</Card>
+          <Card>Widget 3</Card>
+        </Container>
+
+        {/* Vertical Container */}
+        <Container className="flex-1 p-4 bg-gray-100">
+          <Card className="h-full">Vertical Container</Card>
+        </Container>
+      </div>
+    </div>
+  );
+}
+
+
+	5.	Integrate Dynamic Menu Loading:
+	•	Add role-based access logic:
+
+const menuItems = [
+  { label: 'Reports', role: 'admin' },
+  { label: 'EOD Balance', role: 'user' },
+  { label: 'Downloads', role: 'admin' },
+];
+
+function getMenuForRole(role) {
+  return menuItems.filter((item) => item.role === role);
+}
+
+
+	6.	Run the Application:
+	•	Start the development server:
+
+npm run dev
+
+
+	•	Open http://localhost:3000 in your browser.
+
+Folder Structure
+
+your-app-name/
+├── components/
+│   ├── Layout.js
+├── pages/
+│   ├── index.js
+├── public/
+├── styles/
+│   ├── globals.css
+├── tailwind.config.js
+└── package.json
+
+This setup mirrors the provided wireframe while adhering to modern development practices with React, Next.js, and ShadCN. Let me know if you’d like further customization!
