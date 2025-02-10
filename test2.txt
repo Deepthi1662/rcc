@@ -1,4 +1,35 @@
-To replicate the complete dashboard page shown in the image using ShadCN UI, React 19, and Next.js 15, I’ll provide a starting structure. The code will include components like cards, charts, and navigation. ShadCN provides a modern and accessible design system that integrates well with React.
+To replicate the complete dashboard page shown in the image using ShadCN UI, React 19, and Next.js 15, I’ll provide a starting structure. The code will include components like cards, charts, and navigation. ShadCN provides a modern and accessible design system that integrates well with # Stage 1: Build
+FROM node:23-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the app
+COPY . .
+
+# Build the Next.js app
+RUN npm run build
+
+# Stage 2: Run
+FROM node:23-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy built files from builder stage
+COPY --from=builder /app ./
+
+# Expose port 3000
+EXPOSE 3000
+
+# Start the Next.js application
+CMD ["npm", "run", "start"]
 
 Here’s a step-by-step implementation plan:
 	1.	Install Dependencies
