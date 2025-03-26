@@ -1,245 +1,27 @@
-To create a UI using React 19, Next.js 15, and ShadCN (ShadUI), I’ll guide you through the implementation based on the wireframe provided in the image.
+ServiceActivationDetail pbService = ServiceActivationDetail.builder()
+                .serviceType(PHONE_BANKING)
+                .isActive(serviceActivationStatus.getPhnBankingRegistrationFlag())
+                .build();
+        ServiceActivationDetail mbService = ServiceActivationDetail.builder()
+                .serviceType(MOBILE_BANKING)
+                .isActive(serviceActivationStatus.getMbBankngRegistrationFlag())
+                .activeStatusInDays(serviceActivationStatus.getMbBankingLastActive())
+                .build();
+        ServiceActivationDetail nbService = ServiceActivationDetail.builder()
+                .serviceType(NET_BANKING)
+                .isActive(serviceActivationStatus.getNetBankingRegistrationFlag())
+                .activeStatusInDays(serviceActivationStatus.getNetBankingLastActive())
+                .build();
+        ServiceActivationDetail posService = ServiceActivationDetail.builder()
+                .serviceType(POS)
+                .isActive(serviceActivationStatus.getPosRegistrationFlag())
+                .activeStatusInDays(serviceActivationStatus.getPosLastActive())
+                .build();
 
-Steps to Build the Application
-	1.	Set up the Next.js Project:
-	•	Run the following command to set up a Next.js app:
+        List<ServiceActivationDetail> serviceActivationDetails = new ArrayList<>();
+        serviceActivationDetails.add(pbService);
+        serviceActivationDetails.add(mbService);
+        serviceActivationDetails.add(nbService);
+        serviceActivationDetails.add(posService);
 
-npx create-next-app@latest your-app-name
-cd your-app-name
-npm install @shadcn/ui
-
-
-	2.	Install Required Dependencies:
-	•	Add dependencies for ShadCN and React:
-
-npm install tailwindcss postcss autoprefixer @shadcn/ui
-npx tailwindcss init
-
-
-	3.	Configure Tailwind CSS:
-	•	Update the tailwind.config.js file:
-
-module.exports = {
-  content: [
-    './pages/**/*.{js,ts,jsx,tsx}',
-    './components/**/*.{js,ts,jsx,tsx}',
-    './node_modules/@shadcn/ui/**/*.{js,ts,jsx,tsx}',
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-};
-
-
-	4.	Create the Layout:
-	•	Implement the basic layout structure as per the wireframe:
-
-import { Card, Navbar, Sidebar, Widget } from '@shadcn/ui'; // Assuming Widget isn't used in the current layout
-import { FC } from 'react';
-
-const Layout: FC = () => {
-  return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <Sidebar className="w-1/4 bg-gray-800 text-white p-4">
-        <div className="space-y-4">
-          <div>CRN Search</div>
-          <div>Reports</div>
-          <div>EOD Balance</div>
-          <div>Downloads (Dynamic Role-based)</div>
-        </div>
-      </Sidebar>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Top Navbar */}
-        <Navbar className="bg-gray-200 p-4 flex justify-between">
-          <div>On click: Customer 360 View</div>
-          <div>Profile Details</div>
-        </Navbar>
-
-        {/* Widgets Section */}
-        <div className="grid grid-cols-3 gap-4 p-4">
-          <Card>Widget 1</Card>
-          <Card>Widget 2</Card>
-          <Card>Widget 3</Card>
-        </div>
-
-        {/* Vertical Container */}
-        <div className="flex-1 p-4 bg-gray-100">
-          <Card className="h-full">Vertical Container</Card>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default Layout;
-
-
-
-	5.	Integrate Dynamic Menu Loading:
-	•	Add role-based access logic:
-
-const menuItems = [
-  { label: 'Reports', role: 'admin' },
-  { label: 'EOD Balance', role: 'user' },
-  { label: 'Downloads', role: 'admin' },
-];
-
-function getMenuForRole(role) {
-  return menuItems.filter((item) => item.role === role);
-}
-
-
-	6.	Run the Application:
-	•	Start the development server:
-
-npm run dev
-
-
-	•	Open http://localhost:3000 in your browser.
-
-Folder Structure
-
-your-app-name/
-├── components/
-│   ├── Layout.js
-├── pages/
-│   ├── index.js
-├── public/
-├── styles/
-│   ├── globals.css
-├── tailwind.config.js
-└── package.json
-
-// app/page.tsx (or pages/index.tsx if using the "pages" directory)
-"use client";
-
-import { FC } from "react";
-import { Card, CardContent, CardHeader } from "@shadcn/ui";
-import { Input } from "@shadcn/ui";
-import { Button } from "@shadcn/ui";
-
-const Dashboard: FC = () => {
-  return (
-    <div className="flex flex-col h-screen">
-      {/* Header */}
-      <header className="flex justify-between p-4 border-b">
-        <div>CRN Search</div>
-        <div>On click on submit Customer 360 view page</div>
-        <div>Profile Details</div>
-      </header>
-
-      {/* Body */}
-      <main className="flex flex-grow">
-        {/* Sidebar */}
-        <aside className="w-1/4 p-4 border-r">
-          <div className="mb-4">
-            Menu items Report / Downloads dynamically load access on basis of roles
-          </div>
-          <div className="mb-4">Reports</div>
-          <div>EOD Balance</div>
-        </aside>
-
-        {/* Main Content */}
-        <section className="flex flex-col flex-grow p-4">
-          {/* Widgets */}
-          <div className="flex justify-between mb-4 space-x-4">
-            <Card className="flex-1">
-              <CardHeader>Widgets</CardHeader>
-              <CardContent></CardContent>
-            </Card>
-            <Card className="flex-1">
-              <CardHeader>Widgets</CardHeader>
-              <CardContent></CardContent>
-            </Card>
-            <Card className="flex-1">
-              <CardHeader>Widgets</CardHeader>
-              <CardContent></CardContent>
-            </Card>
-          </div>
-
-          {/* Vertical Container */}
-          <div className="flex-grow border p-4">Vertical Container</div>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="p-4 border-t text-center">
-        React JS - 19 | Next JS - 15 | ShadCN
-      </footer>
-    </div>
-  );
-};
-
-export default Dashboard;
-
-
-// app/page.tsx (or pages/index.tsx if using "pages" directory)
-"use client";
-
-import { FC } from "react";
-import { Button } from "@shadcn/ui";
-import { Input } from "@shadcn/ui";
-
-const Dashboard: FC = () => {
-  return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <aside className="w-1/4 bg-blue-100 p-4">
-        <div className="font-bold text-lg mb-6">/thoughtworks</div>
-        <nav className="space-y-4">
-          <div>
-            <h3 className="font-semibold">My Apps</h3>
-            <ul className="ml-4 space-y-2">
-              <li className="text-blue-600">Work</li>
-              <li className="text-gray-600">Add section +</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold">Notifications</h3>
-            <div className="ml-4">(1)</div>
-          </div>
-          <div>
-            <h3 className="font-semibold">Add Apps</h3>
-          </div>
-        </nav>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-grow bg-white p-6">
-        {/* Header */}
-        <header className="flex justify-between items-center mb-6">
-          <Input
-            className="w-1/3"
-            placeholder="Search your apps"
-          />
-          <div className="flex items-center space-x-4">
-            <Button variant="outline">Sort</Button>
-            <div className="text-sm">
-              <div>Deepthi</div>
-              <div>Thoughtworks</div>
-            </div>
-          </div>
-        </header>
-
-        {/* Content */}
-        <section>
-          <h2 className="text-lg font-semibold mb-4">My Apps</h2>
-          <div className="p-4 border rounded-lg">Work</div>
-          <Button className="mt-4">Add Section</Button>
-        </section>
-      </main>
-    </div>
-  );
-};
-
-export default Dashboard;
-
-
-
-
-
-This setup mirrors the provided wireframe while adhering to modern development practices with React, Next.js, and ShadCN. Let me know if you’d like further customization!
+        customer360ResponseBuilder.serviceActivationDetails(serviceActivationDetails);
