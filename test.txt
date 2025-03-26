@@ -1,27 +1,26 @@
-ServiceActivationDetail pbService = ServiceActivationDetail.builder()
-                .serviceType(PHONE_BANKING)
-                .isActive(serviceActivationStatus.getPhnBankingRegistrationFlag())
-                .build();
-        ServiceActivationDetail mbService = ServiceActivationDetail.builder()
-                .serviceType(MOBILE_BANKING)
-                .isActive(serviceActivationStatus.getMbBankngRegistrationFlag())
-                .activeStatusInDays(serviceActivationStatus.getMbBankingLastActive())
-                .build();
-        ServiceActivationDetail nbService = ServiceActivationDetail.builder()
-                .serviceType(NET_BANKING)
-                .isActive(serviceActivationStatus.getNetBankingRegistrationFlag())
-                .activeStatusInDays(serviceActivationStatus.getNetBankingLastActive())
-                .build();
-        ServiceActivationDetail posService = ServiceActivationDetail.builder()
-                .serviceType(POS)
-                .isActive(serviceActivationStatus.getPosRegistrationFlag())
-                .activeStatusInDays(serviceActivationStatus.getPosLastActive())
-                .build();
+// Helper method to build a ServiceActivationDetail object
+private ServiceActivationDetail buildServiceActivationDetail(String serviceType, boolean isActive, Integer activeStatusInDays) {
+    return ServiceActivationDetail.builder()
+            .serviceType(serviceType)
+            .isActive(isActive)
+            .activeStatusInDays(activeStatusInDays)
+            .build();
+}
 
-        List<ServiceActivationDetail> serviceActivationDetails = new ArrayList<>();
-        serviceActivationDetails.add(pbService);
-        serviceActivationDetails.add(mbService);
-        serviceActivationDetails.add(nbService);
-        serviceActivationDetails.add(posService);
+...
 
-        customer360ResponseBuilder.serviceActivationDetails(serviceActivationDetails);
+// Map of service types to their corresponding flags and last active days
+Map<String, Pair<Boolean, Integer>> serviceDetailsMap = Map.of(
+    PHONE_BANKING, new Pair<>(serviceActivationStatus.getPhnBankingRegistrationFlag(), null),
+    MOBILE_BANKING, new Pair<>(serviceActivationStatus.getMbBankngRegistrationFlag(), serviceActivationStatus.getMbBankingLastActive()),
+    NET_BANKING, new Pair<>(serviceActivationStatus.getNetBankingRegistrationFlag(), serviceActivationStatus.getNetBankingLastActive()),
+    POS, new Pair<>(serviceActivationStatus.getPosRegistrationFlag(), serviceActivationStatus.getPosLastActive())
+);
+
+// Build service activation details using the serviceDetailsMap
+List<ServiceActivationDetail> serviceActivationDetails = serviceDetailsMap.entrySet().stream()
+    .map(entry -> buildServiceActivationDetail(entry.getKey(), entry.getValue().getKey(), entry.getValue().getValue()))
+    .collect(Collectors.toList());
+
+// Set service activation details to the response builder
+customer360ResponseBuilder.serviceActivationDetails(serviceActivationDetails);
