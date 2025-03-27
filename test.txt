@@ -1,26 +1,32 @@
-// Helper method to build a ServiceActivationDetail object
-private ServiceActivationDetail buildServiceActivationDetail(String serviceType, boolean isActive, Integer activeStatusInDays) {
-    return ServiceActivationDetail.builder()
-            .serviceType(serviceType)
-            .isActive(isActive)
-            .activeStatusInDays(activeStatusInDays)
-            .build();
-}
+List<GraphicalSegment> eopBalance = new ArrayList<>();
 
-...
+        eopBalance.add(GraphicalSegment.builder()
+                .xKey(DAY1)
+                .value(customerPortfolioTrend.getEOP_D1())
+                .build());
+        eopBalance.add(GraphicalSegment.builder()
+                .xKey(DAY2)
+                .value(customerPortfolioTrend.getEOP_D2())
+                .build());
+        eopBalance.add(GraphicalSegment.builder()
+                .xKey(DAY3)
+                .value(customerPortfolioTrend.getEOP_D3())
+                .build());
+        eopBalance.add(GraphicalSegment.builder()
+                .xKey(DAY4)
+                .value(customerPortfolioTrend.getEOP_D4())
+                .build());
+        eopBalance.add(GraphicalSegment.builder()
+                .xKey(DAY5)
+                .value(customerPortfolioTrend.getEOP_D5())
+                .build());
+        eopBalance.add(GraphicalSegment.builder()
+                .xKey(DAY6)
+                .value(customerPortfolioTrend.getEOP_D6())
+                .build());
+        eopBalance.add(GraphicalSegment.builder()
+                .xKey(DAY7)
+                .value(customerPortfolioTrend.getEOP_D7())
+                .build());
 
-// Map of service types to their corresponding flags and last active days
-Map<String, Pair<Boolean, Integer>> serviceDetailsMap = Map.of(
-    PHONE_BANKING, new Pair<>(serviceActivationStatus.getPhnBankingRegistrationFlag(), null),
-    MOBILE_BANKING, new Pair<>(serviceActivationStatus.getMbBankngRegistrationFlag(), serviceActivationStatus.getMbBankingLastActive()),
-    NET_BANKING, new Pair<>(serviceActivationStatus.getNetBankingRegistrationFlag(), serviceActivationStatus.getNetBankingLastActive()),
-    POS, new Pair<>(serviceActivationStatus.getPosRegistrationFlag(), serviceActivationStatus.getPosLastActive())
-);
-
-// Build service activation details using the serviceDetailsMap
-List<ServiceActivationDetail> serviceActivationDetails = serviceDetailsMap.entrySet().stream()
-    .map(entry -> buildServiceActivationDetail(entry.getKey(), entry.getValue().getKey(), entry.getValue().getValue()))
-    .collect(Collectors.toList());
-
-// Set service activation details to the response builder
-customer360ResponseBuilder.serviceActivationDetails(serviceActivationDetails);
+        customer360ResponseBuilder.eopBalance(eopBalance);
