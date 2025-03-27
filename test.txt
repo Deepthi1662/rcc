@@ -1,21 +1,41 @@
-List<GraphicalSegment> eopBalance = new ArrayList<>();
+{
+                    month: "Feb'24",
+                    balance: 39289,
+                },
+                {
+                    month: "Mar'24",
+                    balance: 22414,
+                },
+ 
+                {
+                    month: "Jan'25",
+                    balance: 66290,
+                },
+                {
+                    month: "Feb'25",
+                    balance: 41935,
+                },
+ 
+                {
+                    month: "Nov'24\n(Peak Value)",
+                    balance: 95684,
+                },
 
-// Create a map to associate each day with the corresponding EOP value
-Map<Integer, Double> eopMap = new HashMap<>();
-eopMap.put(1, customerPortfolioTrend.getEOP_D1());
-eopMap.put(2, customerPortfolioTrend.getEOP_D2());
-eopMap.put(3, customerPortfolioTrend.getEOP_D3());
-eopMap.put(4, customerPortfolioTrend.getEOP_D4());
-eopMap.put(5, customerPortfolioTrend.getEOP_D5());
-eopMap.put(6, customerPortfolioTrend.getEOP_D6());
-eopMap.put(7, customerPortfolioTrend.getEOP_D7());
 
-// Loop through the map and create GraphicalSegment objects dynamically
-for (Map.Entry<Integer, Double> entry : eopMap.entrySet()) {
-    eopBalance.add(GraphicalSegment.builder()
-            .xKey("DAY" + entry.getKey()) // Dynamically create "DAY1", "DAY2", etc.
-            .value(entry.getValue()) // Get corresponding EOP value from map
-            .build());
-}
+List<GraphicalSegment> amb = new ArrayList<>();
 
-customer360ResponseBuilder.eopBalance(eopBalance);
+        Map<String, BigDecimal> ambMap = new HashMap<>();
+        ambMap.put(DAY2, customerPortfolioTrend.getCURR_MTH_LTYR_AMB());
+        ambMap.put(DAY3, customerPortfolioTrend.getLAST_FY_AMB());
+        ambMap.put(DAY1, customerPortfolioTrend.getCURR_MTH_AMB());
+        ambMap.put(DAY5, customerPortfolioTrend.getPREV_MTH_AMB());
+        ambMap.put(DAY4, customerPortfolioTrend.getPEAK_AMB());
+
+        for (Map.Entry<String , BigDecimal> entry : ambMap.entrySet()) {
+            amb.add(GraphicalSegment.builder()
+                    .xKey(entry.getKey())
+                    .balance(entry.getValue())
+                    .build());
+        }
+
+        customer360ResponseBuilder.ambMovement(amb);
