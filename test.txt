@@ -1,41 +1,52 @@
-{
-                    month: "Feb'24",
-                    balance: 39289,
-                },
-                {
-                    month: "Mar'24",
-                    balance: 22414,
-                },
- 
-                {
-                    month: "Jan'25",
-                    balance: 66290,
-                },
-                {
-                    month: "Feb'25",
-                    balance: 41935,
-                },
- 
-                {
-                    month: "Nov'24\n(Peak Value)",
-                    balance: 95684,
-                },
-
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.math.BigDecimal;
 
 List<GraphicalSegment> amb = new ArrayList<>();
 
-        Map<String, BigDecimal> ambMap = new HashMap<>();
-        ambMap.put(DAY2, customerPortfolioTrend.getCURR_MTH_LTYR_AMB());
-        ambMap.put(DAY3, customerPortfolioTrend.getLAST_FY_AMB());
-        ambMap.put(DAY1, customerPortfolioTrend.getCURR_MTH_AMB());
-        ambMap.put(DAY5, customerPortfolioTrend.getPREV_MTH_AMB());
-        ambMap.put(DAY4, customerPortfolioTrend.getPEAK_AMB());
+Map<String, BigDecimal> ambMap = new HashMap<>();
+ambMap.put("Current Month", customerPortfolioTrend.getCURR_MTH_AMB());
+ambMap.put("Last Month", customerPortfolioTrend.getPREV_MTH_AMB());
+ambMap.put("Last Financial Year", customerPortfolioTrend.getLAST_FY_AMB());
+ambMap.put("Current Month Last Year", customerPortfolioTrend.getCURR_MTH_LTYR_AMB());
+ambMap.put("Peak in Last 18 Months", customerPortfolioTrend.getPEAK_AMB());
 
-        for (Map.Entry<String , BigDecimal> entry : ambMap.entrySet()) {
-            amb.add(GraphicalSegment.builder()
-                    .xKey(entry.getKey())
-                    .balance(entry.getValue())
-                    .build());
-        }
+// Formatter to get the month in "MMM'yy" format
+DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM'yy");
 
-        customer360ResponseBuilder.ambMovement(amb);
+for (Map.Entry<String, BigDecimal> entry : ambMap.entrySet()) {
+    // Get the formatted month string
+    String monthString = getFormattedMonth(entry.getKey(), formatter);
+    
+    amb.add(GraphicalSegment.builder()
+            .xKey(monthString)  // Use the formatted month
+            .balance(entry.getValue())
+            .build());
+}
+
+customer360ResponseBuilder.ambMovement(amb);
+
+// Helper method to map each key to its corresponding month
+private String getFormattedMonth(String key, DateTimeFormatter formatter) {
+    LocalDate currentDate = LocalDate.now();  // Get current date
+    LocalDate lastFinancialYearEnd = LocalDate.of(currentDate.getYear() - 1, 3, 31);  // March of last year
+
+    switch (key) {
+        case "Current Month":
+            return currentDate.format(formatter);  // e.g., Mar'25
+        case "Last Month":
+            return currentDate.minusMonths(1).format(formatter);  // e.g., Feb'25
+        case "Last Financial Year":
+            return lastFinancialYearEnd.format(formatter);  // e.g., Mar'24 (March of last year)
+        case "Current Month Last Year":
+            return currentDate.minusYears(1).format(formatter);  // e.g., Mar'24 (same month last year)
+        case "Peak in Last 18 Months":
+            return currentDate.minusMonths(6).format(formatter);  // e.g., Nov'24 (6 months ago)
+        default:
+            return currentDate.format(formatter);  // Default to current month
+    }
+}
