@@ -1,32 +1,21 @@
 List<GraphicalSegment> eopBalance = new ArrayList<>();
 
-        eopBalance.add(GraphicalSegment.builder()
-                .xKey(DAY1)
-                .value(customerPortfolioTrend.getEOP_D1())
-                .build());
-        eopBalance.add(GraphicalSegment.builder()
-                .xKey(DAY2)
-                .value(customerPortfolioTrend.getEOP_D2())
-                .build());
-        eopBalance.add(GraphicalSegment.builder()
-                .xKey(DAY3)
-                .value(customerPortfolioTrend.getEOP_D3())
-                .build());
-        eopBalance.add(GraphicalSegment.builder()
-                .xKey(DAY4)
-                .value(customerPortfolioTrend.getEOP_D4())
-                .build());
-        eopBalance.add(GraphicalSegment.builder()
-                .xKey(DAY5)
-                .value(customerPortfolioTrend.getEOP_D5())
-                .build());
-        eopBalance.add(GraphicalSegment.builder()
-                .xKey(DAY6)
-                .value(customerPortfolioTrend.getEOP_D6())
-                .build());
-        eopBalance.add(GraphicalSegment.builder()
-                .xKey(DAY7)
-                .value(customerPortfolioTrend.getEOP_D7())
-                .build());
+// Create a map to associate each day with the corresponding EOP value
+Map<Integer, Double> eopMap = new HashMap<>();
+eopMap.put(1, customerPortfolioTrend.getEOP_D1());
+eopMap.put(2, customerPortfolioTrend.getEOP_D2());
+eopMap.put(3, customerPortfolioTrend.getEOP_D3());
+eopMap.put(4, customerPortfolioTrend.getEOP_D4());
+eopMap.put(5, customerPortfolioTrend.getEOP_D5());
+eopMap.put(6, customerPortfolioTrend.getEOP_D6());
+eopMap.put(7, customerPortfolioTrend.getEOP_D7());
 
-        customer360ResponseBuilder.eopBalance(eopBalance);
+// Loop through the map and create GraphicalSegment objects dynamically
+for (Map.Entry<Integer, Double> entry : eopMap.entrySet()) {
+    eopBalance.add(GraphicalSegment.builder()
+            .xKey("DAY" + entry.getKey()) // Dynamically create "DAY1", "DAY2", etc.
+            .value(entry.getValue()) // Get corresponding EOP value from map
+            .build());
+}
+
+customer360ResponseBuilder.eopBalance(eopBalance);
