@@ -49,4 +49,9 @@ private String getFormattedMonth(String key, DateTimeFormatter formatter) {
         default:
             return currentDate.format(formatter);  // Default to current month
     }
+
+ambMap.put(CUR_QTR, customerPortfolioTrend.getCurrQtrAqb());
+        ambMap.put(PREV_QTR, customerPortfolioTrend.getPrevQtrAqb());
+        ambMap.put(CUR_QTR_IN_LAST_YEAR, customerPortfolioTrend.getCurrQtrLastYearAqb());
+        ambMap.put(LAST_QTR_IN_LAST_YEAR, customerPortfolioTrend.getLastQtrLastYearAqb());
 }
