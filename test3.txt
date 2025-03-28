@@ -1,36 +1,4 @@
-# Stage 1: Build
-FROM node:23-alpine AS builder
+INSERT INTO rel.relationship_details (crn, rm_name, customer_classification, current_rv, customer_lob, branch_code, ph_count, ph_string, family_rv, service_manager_name, mf_redemption_amount_3m, mf_purchase_amount_3m, created_by, created_at, updated_by, updated_at) 
+VALUES ('CRN123456789', 'John Doe', 'High Net Worth', 1000000.00, 'Personal', 'BR123', 5, 'PH1, PH2, PH3', 500000.00, 'Jane Smith', 150000.00, 200000.00, 'Admin', CURRENT_TIMESTAMP, 'Admin', CURRENT_TIMESTAMP);
 
-# Set working directory
-WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package.json package-lock.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the app
-COPY . .
-
-# Build the Next.js app
-RUN npm run build
-
-# Stage 2: Run
-FROM node:23-alpine
-
-# Set a non-root user for better security (Podman works well with this)
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
-
-# Set working directory
-WORKDIR /app
-
-# Copy built files from builder stage
-COPY --from=builder /app ./
-
-# Expose port 3000
-EXPOSE 3000
-
-# Start the Next.js application
-CMD ["npm", "run", "start"]
