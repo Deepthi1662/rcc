@@ -1,284 +1,371 @@
-To replicate the complete dashboard page shown in the image using ShadCN UI, React 19, and Next.js 15, I’ll provide a starting structure. The code will include components like cards, charts, and navigation. ShadCN provides a modern and accessible design system that integrates well with # Stage 1: Build
-FROM node:23-alpine AS builder
+-- Create schema for Customer 360.
+CREATE SCHEMA IF NOT EXISTS rel;
 
-# Set working directory
-WORKDIR /app
+-- Core Customer Profile
+CREATE TABLE rel.customer_profile (
+    crn VARCHAR(20) PRIMARY KEY,
+    family_id VARCHAR(20) NOT NULL,
+    customer_name VARCHAR(255) NOT NULL,
+    date_of_birth DATE,
+    branch_name VARCHAR(100) NOT NULL,
+    risk_profile_code VARCHAR(20),
+    crn_creation_date DATE NOT NULL,
+    city VARCHAR(100),
+    customer_persona VARCHAR(50),
+    rekyc_status VARCHAR(20),
+    --is_active BOOLEAN DEFAULT true,
+    created_by VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by VARCHAR(100) NOT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+ 
+-- Relationship Details
+CREATE TABLE rel.relationship_details (
+    crn VARCHAR(20) PRIMARY KEY,
+    rm_name VARCHAR(255),
+    customer_classification VARCHAR(50),
+    current_rv DECIMAL(20,2) DEFAULT 0.00,
+    customer_lob VARCHAR(20),
+    branch_code VARCHAR(20) NOT NULL,
+    ph_count INT DEFAULT 0,
+    ph_string TEXT,
+    family_rv DECIMAL(20,2) DEFAULT 0.00,
+    service_manager_name VARCHAR(255),
+    mf_redemption_amount_3m DECIMAL(20,2) DEFAULT 0.00,
+    mf_purchase_amount_3m DECIMAL(20,2) DEFAULT 0.00,
+    --is_active BOOLEAN DEFAULT true,
+    created_by VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by VARCHAR(100) NOT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+ 
+--  Customer Profile Trends
+CREATE TABLE rel.customer_portfolio_trend (
+    CRN VARCHAR(20) PRIMARY KEY,
+    MONTH_ID INTEGER NOT NULL,
+    EOP_D1 NUMERIC(40,0) NOT NULL,
+    EOP_D2 NUMERIC(40,0) NOT NULL,
+    EOP_D3 NUMERIC(40,0) NOT NULL,
+    EOP_D4 NUMERIC(40,0) NOT NULL,
+    EOP_D5 NUMERIC(40,0) NOT NULL,
+    EOP_D6 NUMERIC(40,0) NOT NULL,
+    EOP_D7 NUMERIC(40,0) NOT NULL,
+    LAST_FY_AMB NUMERIC(40,0) NOT NULL,
+    CURR_MTH_LTYR_AMB NUMERIC(40,0) NOT NULL,
+    PREV_MTH_AMB NUMERIC(40,0) NOT NULL,
+    CURR_MTH_AMB NUMERIC(40,0) NOT NULL,
+    PEAK_MTHID_AMB INTEGER NOT NULL,
+    PEAK_AMB NUMERIC(40,0) NOT NULL,
+    LAST_QTR_LTYR_AQB NUMERIC(40,0) NOT NULL,
+    CURR_QTR_LTYR_AQB NUMERIC(40,0) NOT NULL,
+    PREV_QTR_AQB NUMERIC(40,0) NOT NULL,
+    CURR_QTR_AQB NUMERIC(40,0) NOT NULL,
+    LAST_FY_RV NUMERIC(40,0) NOT NULL,
+    CURR_MTH_LTYR_RV NUMERIC(40,0) NOT NULL,
+    PREV_MTH_RV NUMERIC(40,0) NOT NULL,
+    CURR_MTH_RV NUMERIC(40,0) NOT NULL,
+    PEAK_MTHID_RV INTEGER NOT NULL,
+    PEAK_RV NUMERIC(40,0) NOT NULL,
+    CREATED_BY VARCHAR(100) NOT NULL,
+    CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_BY VARCHAR(100) NOT NULL,
+    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
-# Copy package.json and package-lock.json
-COPY package.json package-lock.json ./
+--  Customer OffUs Details
+CREATE TABLE rel.offus_details (
+     CRN VARCHAR(20) PRIMARY KEY,
+     MONTH_ID INTEGER NOT NULL,
+     LOAN_OFFUS_SANTION NUMERIC(40,0) NOT NULL,
+     LOAN_OFFUS_OS NUMERIC(40,0) NOT NULL,
+     CC_LIMIT_OFFUS NUMERIC(40,0) NOT NULL,
+     MF_TRNS_DEBIT_OFFUS NUMERIC(40,0) NOT NULL,
+     DEMAT_OFF_US NUMERIC(40,0) NOT NULL,
+     CREATED_BY VARCHAR(100) NOT NULL,
+     CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     UPDATED_BY VARCHAR(100) NOT NULL,
+     UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+--  Customer Individual / Family RV breakup
+CREATE TABLE rel.rv_details_relationship (
+     CRN VARCHAR(20) PRIMARY KEY,
+     CA_AMB NUMERIC(40,0) NOT NULL,
+     SA_AMB NUMERIC(40,0) NOT NULL,
+     TD_EOP NUMERIC(40,0) NOT NULL,
+     MF_AUM NUMERIC(40,0) NOT NULL,
+     MF_OTHERS NUMERIC(40,0) NOT NULL,
+     INSURANCE NUMERIC(40,0) NOT NULL,
+     SANCTION30 NUMERIC(40,0) NOT NULL,
+     DEMAT30 NUMERIC(40,0) NOT NULL,
+     FMLY_ID VARCHAR(20),
+     FMLY_CA_AMB NUMERIC(40,0) NOT NULL,
+     FMLY_SA_AMB NUMERIC(40,0) NOT NULL,
+     FMLY_TD_EOP NUMERIC(40,0) NOT NULL,
+     FMLY_MF_AUM NUMERIC(40,0) NOT NULL,
+     FMLY_MF_OTHERS NUMERIC(40,0) NOT NULL,
+     FMLY_INSURANCE NUMERIC(40,0) NOT NULL,
+     FMLY_SANCTION30 NUMERIC(40,0) NOT NULL,
+     FMLY_DEMAT30 NUMERIC(40,0) NOT NULL,
+     CREATED_BY VARCHAR(100) NOT NULL,
+     CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     UPDATED_BY VARCHAR(100) NOT NULL,
+     UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 
-# Install dependencies
-RUN npm install
+);
+--  Customer Account (CASA) details
+CREATE TABLE rel.casa_details (
+    CRN VARCHAR(20) PRIMARY KEY,
+    MONTH_ID INTEGER NOT NULL,
+    NO_OF_CA_ACCOUNTS INTEGER NOT NULL,
+    NO_OF_SA_ACCOUNTS INTEGER NOT NULL,
+    TOTAL_CA_BAL NUMERIC(40,0) NOT NULL,
+    TOTAL_SA_BAL NUMERIC(40,0) NOT NULL,
+    ACCOUNT_NO  VARCHAR(30) NOT NULL,
+    PRODUCT_TYPE VARCHAR(10) NOT NULL,
+    PRODUCT_CODE VARCHAR(30) NOT NULL,
+    BRANCH_CODE VARCHAR(10) NOT NULL,
+    LOB_CODE VARCHAR(30) NOT NULL,
+    ACCOUNT_OPEN_DATE TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CURR_MONTH_BAL  NUMERIC(40,0) NOT NULL,
+    PREV_MONTH_BAL NUMERIC(40,0) NOT NULL,
+    MONTH2_BAL   NUMERIC(40,0) NOT NULL,
+    MONTH3_BAL  NUMERIC(40,0) NOT NULL,
+    FYEND_BAL  NUMERIC(40,0) NOT NULL,
+    LASTFY_BAL  NUMERIC(40,0) NOT NULL,
+    Q1_AQB  NUMERIC(40,0) NOT NULL,
+    Q2_AQB  NUMERIC(40,0) NOT NULL,
+    Q3_AQB  NUMERIC(40,0) NOT NULL,
+    Q4_AQB  NUMERIC(40,0) NOT NULL,
+    BCIF_LG VARCHAR(30) NOT NULL,
+    FINCODLOB VARCHAR(10) NOT NULL,
+    BCIF_LC  VARCHAR(30) NOT NULL,
+    FLEX_LC  VARCHAR(30) NOT NULL,
+    BCIF_RM VARCHAR(50) NOT NULL,
+    FLEX_LG VARCHAR(30) NOT NULL,
+    CREATED_BY VARCHAR(100) NOT NULL,
+    CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_BY VARCHAR(100) NOT NULL,
+    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+--  TD Account details
+CREATE TABLE rel.td_details (
+    NUMBER_OF_TD INTEGER NOT NULL,
+    TOTAL_TD_BAL NUMERIC(40,0) NOT NULL,
+    CRN VARCHAR(20) PRIMARY KEY,
+    MONTH_ID INTEGER NOT NULL,
+    ACCOUNT_NO  VARCHAR(30) NOT NULL,
+    PRODUCT_CODE VARCHAR(30) NOT NULL,
+    PRODUCT_CATEGORY VARCHAR(30) NOT NULL,
+    BRANCH_CODE VARCHAR(10) NOT NULL,
+    LOB_CODE VARCHAR(30) NOT NULL,
+    VALUE_DATE TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    OPEN_DATE TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    DEPOSIT_DATE TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INITIAL_DEP_AMT  NUMERIC(40,0) NOT NULL,
+    CURR_BALANCE NUMERIC(40,0) NOT NULL,
+    MATURITY_DATE TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    BCIF_LG VARCHAR(30) NOT NULL,
+    FLEX_LG VARCHAR(30) NOT NULL,
+    BCIF_LC VARCHAR(30) NOT NULL,
+    FLEX_LC VARCHAR(30) NOT NULL,
+    BCIF_RM VARCHAR(50) NOT NULL,
+    IS_ONLINE INTEGER NOT NULL,
+    PEAK_TD NUMERIC(40,0) NOT NULL,
+    CREATED_BY VARCHAR(100) NOT NULL,
+    CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_BY VARCHAR(100) NOT NULL,
+    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
-# Copy the rest of the app
-COPY . .
+--  Credit card details
+CREATE TABLE rel.credit_card_details (
+    NUMBER_OF_CC INTEGER NOT NULL,
+    TOTAL_LIMIT NUMERIC(40,0) NOT NULL,
+    CRN VARCHAR(20) PRIMARY KEY,
+    UTILIZED_LIMIT NUMERIC(40,0) NOT NULL,
+    CURRENT_BALANCE NUMERIC(40,0) NOT NULL,
+    CARD_OPEN_DATE TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CARD_TYPE VARCHAR(100) NOT NULL,
+    CARD_STATUS VARCHAR(10) NOT NULL,
+    PAYMENT_CYCLE INTEGER NOT NULL,
+    CREATED_BY VARCHAR(100) NOT NULL,
+    CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_BY VARCHAR(100) NOT NULL,
+    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
-# Build the Next.js app
-RUN npm run build
+--  Service Activation status
+CREATE TABLE rel.service_activation_status (
+    CRN VARCHAR(20) PRIMARY KEY,
+    MONTH_ID INTEGER NOT NULL,
+    PHN_BANKNG_REGISTRATION_FLAG  VARCHAR(10) NOT NULL,
+    NET_BANKNG_REGISTRATION_FLAG VARCHAR(10) NOT NULL,
+    NET_BANKNG_LAST_ACTIVE INTEGER NOT NULL,
+    MB_BANKNG_REGISTRATION_FLAG VARCHAR(10) NOT NULL,
+    MB_BANKNG_LAST_ACTIVE INTEGER NOT NULL,
+    POS_REGISTRATION_FLAG VARCHAR(10) NOT NULL,
+    POS_LAST_ACTIVE INTEGER NOT NULL,
+    ATM_REGISTRATION_FLAG VARCHAR(10) NOT NULL,
+    ATM_LAST_ACTIVE INTEGER NOT NULL,
+    CC_REGISTRATION_FLAG VARCHAR(10) NOT NULL,
+    CC_LAST_ACTIVE INTEGER NOT NULL,
+    DC_REGISTRATION_FLAG VARCHAR(10) NOT NULL,
+    DC_LAST_ACTIVE INTEGER NOT NULL,
+    CREATED_BY VARCHAR(100) NOT NULL,
+    CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_BY VARCHAR(100) NOT NULL,
+    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
-# Stage 2: Run
-FROM node:23-alpine
+--  Mutual Funds details
+CREATE TABLE rel.mf_details (
+    NUMBER_OF_MF INTEGER NOT NULL,
+    TOTAL_BALANCE NUMERIC(40,0) NOT NULL,
+    CRN VARCHAR(20) PRIMARY KEY,
+    FOLIO_NO VARCHAR(30) NOT NULL,
+    PRODUCT_NAME VARCHAR(200) NOT NULL,
+    AMC_CODE VARCHAR(10) NOT NULL,
+    AMT_PURCHASED NUMERIC(40,0) NOT NULL,
+    UNITS_PURCHASED NUMERIC(40,0) NOT NULL,
+    AMT_REDEMPTION NUMERIC(40,0) NOT NULL,
+    UNITS_REDEEMED NUMERIC(40,0) NOT NULL,
+    NET_UNITS NUMERIC(40,0) NOT NULL,
+    AUM NUMERIC(40,0) NOT NULL,
+    PROFIT_LOSS NUMERIC(40,0) NOT NULL,
+    CREATED_BY VARCHAR(100) NOT NULL,
+    CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_BY VARCHAR(100) NOT NULL,
+    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 
-# Set working directory
-WORKDIR /app
+);
 
-# Copy built files from builder stage
-COPY --from=builder /app ./
+--  Mutual Funds Others details
+CREATE TABLE rel.mf_details_others (
+    NUMBER_OF_MF INTEGER NOT NULL,
+    TOTAL_BALANCE NUMERIC(40,0) NOT NULL,
+    CRN VARCHAR(20) PRIMARY KEY,
+    CODE VARCHAR(10) NOT NULL,
+    COD_PRODUCT VARCHAR(100) NOT NULL,
+    NM_SCHEME VARCHAR(100) NOT NULL,
+    AMOUNT NUMERIC(40,0) NOT NULL,
+    SOP_PERCENT VARCHAR(10) NOT NULL,
+    CREATED_BY VARCHAR(100) NOT NULL,
+    CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_BY VARCHAR(100) NOT NULL,
+    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 
-# Expose port 3000
-EXPOSE 3000
+);
 
-# Start the Next.js application
-CMD ["npm", "run", "start"]
-
-Here’s a step-by-step implementation plan:
-	1.	Install Dependencies
-Run the following command to set up your Next.js project with the required packages:
-
-npx create-next-app@15 dashboard --ts
-cd dashboard
-npm install @shadcn/ui @tanstack/react-query @nivo/line @headlessui/react clsx
-
-
-	2.	Create the Layout
-Here’s the basic structure for the page:
-
-Code: Complete Dashboard Page
-
-// app/layout.tsx
-import './globals.css';
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body className="bg-gray-100 text-gray-900">
-        {children}
-      </body>
-    </html>
-  );
-}
-
-Code: Dashboard Page
-
-// app/page.tsx
-import React from 'react';
-import { Card } from '@shadcn/ui';
-import { ResponsiveLine } from '@nivo/line';
-
-export default function Dashboard() {
-  // Dummy data for charts
-  const lineChartData = [
-    {
-      id: 'Sales',
-      color: 'hsl(220, 70%, 50%)',
-      data: [
-        { x: 'Jan', y: 100 },
-        { x: 'Feb', y: 200 },
-        { x: 'Mar', y: 300 },
-        { x: 'Apr', y: 150 },
-        { x: 'May', y: 400 },
-      ],
-    },
-  ];
-
-  return (
-    <main className="p-6">
-      <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
-          Settings
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Stats Cards */}
-        <Card className="p-4 shadow">
-          <h2 className="text-sm font-semibold">Sales Per Day</h2>
-          <p className="text-2xl font-bold">$4,230</p>
-          <p className="text-sm text-red-500">-3%</p>
-        </Card>
-
-        <Card className="p-4 shadow">
-          <h2 className="text-sm font-semibold">Customers</h2>
-          <p className="text-2xl font-bold">798</p>
-        </Card>
-
-        <Card className="p-4 shadow">
-          <h2 className="text-sm font-semibold">Traffic</h2>
-          <p className="text-2xl font-bold">486</p>
-        </Card>
-
-        <Card className="p-4 shadow">
-          <h2 className="text-sm font-semibold">Orders</h2>
-          <p className="text-2xl font-bold">7,115</p>
-        </Card>
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-        <Card className="p-4 h-[300px] shadow">
-          <h2 className="text-sm font-semibold">Market Share</h2>
-          <ResponsiveLine
-            data={lineChartData}
-            margin={{ top: 20, right: 20, bottom: 50, left: 50 }}
-            xScale={{ type: 'point' }}
-            yScale={{
-              type: 'linear',
-              min: 'auto',
-              max: 'auto',
-              stacked: true,
-              reverse: false,
-            }}
-            axisBottom={{
-              tickSize: 5,
-              tickPadding: 5,
-              tickRotation: 0,
-              legend: 'Month',
-              legendOffset: 36,
-              legendPosition: 'middle',
-            }}
-            axisLeft={{
-              tickSize: 5,
-              tickPadding: 5,
-              tickRotation: 0,
-              legend: 'Revenue',
-              legendOffset: -40,
-              legendPosition: 'middle',
-            }}
-          />
-        </Card>
-
-        <Card className="p-4 h-[300px] shadow">
-          <h2 className="text-sm font-semibold">Traffic Source</h2>
-          <p>Pie chart or bar chart placeholder</p>
-        </Card>
-      </div>
-    </main>
-  );
-}
-
-Styling: Global Styles
-
-Create a globals.css file with basic styles.
-
-/* globals.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-body {
-  font-family: 'Inter', sans-serif;
-}
-
-Run the Project
-
-Start the development server:
-
-npm run dev
-
-This will provide a skeleton of the dashboard you want. You can add more components like modals, charts, and side navigation by extending this structure. Would you like help customizing specific sections?
+--  Insurance details
+CREATE TABLE rel.insurance_details (
+    NUMBER_OF_INS INTEGER NOT NULL,
+    CURR_BALANCE NUMERIC(40,0) NOT NULL,
+    CRN VARCHAR(20) PRIMARY KEY,
+    PDR_DT  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    POLICY_NUMBER VARCHAR(50) NOT NULL,
+    PRODUCT  VARCHAR(100) NOT NULL,
+    PRODUCT_DESCRIPTION VARCHAR(200) NOT NULL,
+    SUM_ASSURED NUMERIC(40,0) NOT NULL,
+    BASIC_CPI NUMERIC(40,0) NOT NULL,
+    TERM INTEGER NOT NULL,
+    PREMIUM_PAYING_TERM INTEGER NOT NULL,
+    PREMIUM_LTD_WITHOUT_ST NUMERIC(40,0) NOT NULL,
+    CREATED_BY VARCHAR(100) NOT NULL,
+    CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_BY VARCHAR(100) NOT NULL,
+    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
 
 
+--  Asset details
+CREATE TABLE rel.asset_details (
+    CRN VARCHAR(20) PRIMARY KEY,
+    MONTH_ID INTEGER NOT NULL,
+    TYPE_OF_ASSET VARCHAR(10) NOT NULL,
+    NUMBER_OF_ASSET INTEGER NOT NULL,
+    SANCTIONED_AAMOUNT NUMERIC(40,0) NOT NULL,
+    TOTAL_OUTSTANDING_BAL NUMERIC(40,0) NOT NULL,
+    ACCOUNT_NUM  VARCHAR(30) NOT NULL,
+    INTEREST_RATE INTEGER NOT NULL,
+    DISBURSED_AMT NUMERIC(40,0) NOT NULL,
+    LEGAL_CHARGES NUMERIC(40,0) NOT NULL,
+    NUMBER_OF_EMI_OUTSTANDING INTEGER NOT NULL,
+    SOH_BALANCE NUMERIC(40,0) NOT NULL,
+    NUMBER_OF_BOUNCES INTEGER NOT NULL,
+    CREATED_BY VARCHAR(100) NOT NULL,
+    CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_BY VARCHAR(100) NOT NULL,
+    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+
+);
+
+--  SR details
+CREATE TABLE rel.service_requests (
+    CRN VARCHAR(20) PRIMARY KEY,
+    MONTH_ID INTEGER NOT NULL,
+    SR_TICKET_ID VARCHAR(50) NOT NULL,
+    TITLE VARCHAR(200) NOT NULL,
+    SUB_TYPE VARCHAR(100) NOT NULL,
+    NATURE VARCHAR(10) NOT NULL,
+    PRIORITY VARCHAR(10) NOT NULL,
+    STATUS VARCHAR(10) NOT NULL,
+    CHANNEL VARCHAR(20) NOT NULL,
+    SR_CREATION_DATE TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CREATED_BY VARCHAR(100) NOT NULL,
+    CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_BY VARCHAR(100) NOT NULL,
+    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+
+);
+--  Demat details
+CREATE TABLE rel.demat_details (
+    NUMBER_OF_ACCOUNTS INTEGER NOT NULL,
+    TOTAL_HOLDING_VALUE  NUMERIC(40,0) NOT NULL,
+    CRN VARCHAR(20) PRIMARY KEY,
+    TRADING_ACCOUNT_OPEN_DATE TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    LOC_CODE VARCHAR(10) NOT NULL,
+    IS_OFFLINE_ONLINE  INTEGER NOT NULL,
+    DP_ID VARCHAR(50) NOT NULL,
+    DEMANT_ACCOUNT_NUMBER VARCHAR(50) NOT NULL,
+    SOURCING_COMPANY VARCHAR(200) NOT NULL,
+    CLIENT_ACTIVE_STATUS VARCHAR(10) NOT NULL,
+    DEMANT_ACTIVATION_DATE  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    HOLDING_VALUE  NUMERIC(40,0) NOT NULL,
+    CREATED_BY VARCHAR(100) NOT NULL,
+    CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_BY VARCHAR(100) NOT NULL,
+    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+
+);
+
+-- Transaction History 
+CREATE TABLE rel.latest_transactions (
+    crn VARCHAR(20) NOT NULL,
+    transaction_date TIMESTAMP NOT NULL,
+    transaction_channel VARCHAR(50),
+    transaction_description TEXT,
+    transaction_amount DECIMAL(20,2) NOT NULL DEFAULT 0.00,
+    transaction_type VARCHAR(10) NOT NULL,
+    created_by VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_BY VARCHAR(100) NOT NULL,
+    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ;
 
 
-// app/page.tsx
-import React from 'react';
-import { Card } from '@shadcn/ui';
-import { ResponsiveLine } from '@nivo/line';
-
-export default function Dashboard() {
-  // Dummy data for charts
-  const lineChartData = [
-    {
-      id: 'Sales',
-      color: 'hsl(220, 70%, 50%)',
-      data: [
-        { x: 'Jan', y: 100 },
-        { x: 'Feb', y: 200 },
-        { x: 'Mar', y: 300 },
-        { x: 'Apr', y: 150 },
-        { x: 'May', y: 400 },
-      ],
-    },
-  ];
-
-  return (
-    <main className="p-6">
-      <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
-          Settings
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Stats Cards */}
-        <Card className="p-4 shadow">
-          <h2 className="text-sm font-semibold">Sales Per Day</h2>
-          <p className="text-2xl font-bold">$4,230</p>
-          <p className="text-sm text-red-500">-3%</p>
-        </Card>
-
-        <Card className="p-4 shadow">
-          <h2 className="text-sm font-semibold">Customers</h2>
-          <p className="text-2xl font-bold">798</p>
-        </Card>
-
-        <Card className="p-4 shadow">
-          <h2 className="text-sm font-semibold">Traffic</h2>
-          <p className="text-2xl font-bold">486</p>
-        </Card>
-
-        <Card className="p-4 shadow">
-          <h2 className="text-sm font-semibold">Orders</h2>
-          <p className="text-2xl font-bold">7,115</p>
-        </Card>
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-        <Card className="p-4 h-[300px] shadow">
-          <h2 className="text-sm font-semibold">Market Share</h2>
-          <ResponsiveLine
-            data={lineChartData}
-            margin={{ top: 20, right: 20, bottom: 50, left: 50 }}
-            xScale={{ type: 'point' }}
-            yScale={{
-              type: 'linear',
-              min: 'auto',
-              max: 'auto',
-              stacked: true,
-              reverse: false,
-            }}
-            axisBottom={{
-              tickSize: 5,
-              tickPadding: 5,
-              tickRotation: 0,
-              legend: 'Month',
-              legendOffset: 36,
-              legendPosition: 'middle',
-            }}
-            axisLeft={{
-              tickSize: 5,
-              tickPadding: 5,
-              tickRotation: 0,
-              legend: 'Revenue',
-              legendOffset: -40,
-              legendPosition: 'middle',
-            }}
-          />
-        </Card>
-
-        <Card className="p-4 h-[300px] shadow">
-          <h2 className="text-sm font-semibold">Traffic Source</h2>
-          <p>Pie chart or bar chart placeholder</p>
-        </Card>
-      </div>
-    </main>
-  );
-}
+-- Transaction Other Details 
+CREATE TABLE rel.transactions_other_details_mtd (
+    crn VARCHAR(20) NOT NULL,
+    total_credits_mtd INTEGER,
+    total_debits_mtd INTEGER,
+    charges_mtd INTEGER,
+    atm_remote_on_us_mtd INTEGER,
+    branch_mtd INTEGER,
+    created_by VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_BY VARCHAR(100) NOT NULL,
+    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ;
