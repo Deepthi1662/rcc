@@ -1,80 +1,198 @@
 package com.kotak.reliability.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Column;
-import javax.persistence.Table;
-import java.time.LocalDateTime;
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 @Entity
-@Table(name = "rel.rv_details_relationship")
-public class RvDetailsRelationship {
+@Table(name = "sa_details")
+public class SaDetails {
 
     @Id
     @Column(name = "CRN")
-    private String crn;
+    public String crn;
 
-    @Column(name = "CA_AMB")
-    private Double caAmb;
+    @Column(name = "NUMBER_OF_SA")
+    public Integer numberOfSa;
 
-    @Column(name = "SA_AMB")
-    private Double saAmb;
+    @Column(name = "TOTAL_SA_BAL")
+    public BigDecimal totalSaBal;
 
-    @Column(name = "TD_EOP")
-    private Double tdEop;
+    @Column(name = "ACCOUNT_NUM")
+    public String accountNum;
 
-    @Column(name = "MF_AUM")
-    private Double mfAum;
+    @Column(name = "PRODUCT_TYPE")
+    public String productType;
 
-    @Column(name = "MF_OTHERS")
-    private Double mfOthers;
+    @Column(name = "PRODUCT_CODE")
+    public String productCode;
 
-    @Column(name = "INSURANCE")
-    private Double insurance;
+    @Column(name = "BRANCH_CODE")
+    public String branchCode;
 
-    @Column(name = "SANCTION30")
-    private Double sanction30;
+    @Column(name = "LOB_CODE")
+    public String lobCode;
 
-    @Column(name = "DEMAT30")
-    private Double demat30;
+    @Column(name = "ACCOUNT_OPEN_DATE")
+    public Timestamp accountOpenDate;
 
-    @Column(name = "FMLY_ID")
-    private String fmlyId;
+    @Column(name = "CURR_MONTH_BAL")
+    public BigDecimal currMonthBal;
 
-    @Column(name = "FMLY_CA_AMB")
-    private Double fmlyCaAmb;
+    @Column(name = "PREV_MONTH_BAL")
+    public BigDecimal prevMonthBal;
 
-    @Column(name = "FMLY_SA_AMB")
-    private Double fmlySaAmb;
+    @Column(name = "MONTH2_BAL")
+    public BigDecimal month2Bal;
 
-    @Column(name = "FMLY_TD_EOP")
-    private Double fmlyTdEop;
+    @Column(name = "MONTH3_BAL")
+    public BigDecimal month3Bal;
 
-    @Column(name = "FMLY_MF_AUM")
-    private Double fmlyMfAum;
+    @Column(name = "FYEND_BAL")
+    public BigDecimal fyendBal;
 
-    @Column(name = "FMLY_MF_OTHERS")
-    private Double fmlyMfOthers;
+    @Column(name = "LASTFY_BAL")
+    public BigDecimal lastFyBal;
 
-    @Column(name = "FMLY_INSURANCE")
-    private Double fmlyInsurance;
+    @Column(name = "Q1_AQB")
+    public BigDecimal q1Aqb;
 
-    @Column(name = "FMLY_SANCTION30")
-    private Double fmlySanction30;
+    @Column(name = "Q2_AQB")
+    public BigDecimal q2Aqb;
 
-    @Column(name = "FMLY_DEMAT30")
-    private Double fmlyDemat30;
+    @Column(name = "Q3_AQB")
+    public BigDecimal q3Aqb;
+
+    @Column(name = "Q4_AQB")
+    public BigDecimal q4Aqb;
+
+    @Column(name = "BCIF_LG")
+    public String bcifLg;
+
+    @Column(name = "FINCODLOB")
+    public String fincodLob;
+
+    @Column(name = "BCIF_LC")
+    public String bcifLc;
+
+    @Column(name = "FLEX_LC")
+    public String flexLc;
+
+    @Column(name = "BCIF_RM")
+    public String bcifRm;
+
+    @Column(name = "FLEX_LG")
+    public String flexLg;
 
     @Column(name = "CREATED_BY")
-    private String createdBy;
+    public String createdBy;
 
-    @Column(name = "CREATED_ON")
-    private LocalDateTime createdOn;
+    @Column(name = "CREATED_ON", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    public Timestamp createdOn;
 
     @Column(name = "UPDATED_BY")
-    private String updatedBy;
+    public String updatedBy;
 
-    @Column(name = "UPDATED_ON")
-    private LocalDateTime updatedOn;
+    @Column(name = "UPDATED_ON", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    public Timestamp updatedOn;
+}
 
+
+package com.kotak.reliability.entity;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+
+@Entity
+@Table(name = "ca_details")
+public class CaDetails {
+
+    @Id
+    @Column(name = "CRN")
+    public String crn;
+
+    @Column(name = "NUMBER_OF_CA")
+    public Integer numberOfCa;
+
+    @Column(name = "TOTAL_CA_BAL")
+    public BigDecimal totalCaBal;
+
+    @Column(name = "ACCOUNT_NUM")
+    public String accountNum;
+
+    @Column(name = "PRODUCT_TYPE")
+    public String productType;
+
+    @Column(name = "PRODUCT_CODE")
+    public String productCode;
+
+    @Column(name = "BRANCH_CODE")
+    public String branchCode;
+
+    @Column(name = "LOB_CODE")
+    public String lobCode;
+
+    @Column(name = "ACCOUNT_OPEN_DATE")
+    public Timestamp accountOpenDate;
+
+    @Column(name = "CURR_MONTH_BAL")
+    public BigDecimal currMonthBal;
+
+    @Column(name = "PREV_MONTH_BAL")
+    public BigDecimal prevMonthBal;
+
+    @Column(name = "MONTH2_BAL")
+    public BigDecimal month2Bal;
+
+    @Column(name = "MONTH3_BAL")
+    public BigDecimal month3Bal;
+
+    @Column(name = "FYEND_BAL")
+    public BigDecimal fyendBal;
+
+    @Column(name = "LASTFY_BAL")
+    public BigDecimal lastFyBal;
+
+    @Column(name = "Q1_AQB")
+    public BigDecimal q1Aqb;
+
+    @Column(name = "Q2_AQB")
+    public BigDecimal q2Aqb;
+
+    @Column(name = "Q3_AQB")
+    public BigDecimal q3Aqb;
+
+    @Column(name = "Q4_AQB")
+    public BigDecimal q4Aqb;
+
+    @Column(name = "BCIF_LG")
+    public String bcifLg;
+
+    @Column(name = "FINCODLOB")
+    public String fincodLob;
+
+    @Column(name = "BCIF_LC")
+    public String bcifLc;
+
+    @Column(name = "FLEX_LC")
+    public String flexLc;
+
+    @Column(name = "BCIF_RM")
+    public String bcifRm;
+
+    @Column(name = "FLEX_LG")
+    public String flexLg;
+
+    @Column(name = "CREATED_BY")
+    public String createdBy;
+
+    @Column(name = "CREATED_ON", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    public Timestamp createdOn;
+
+    @Column(name = "UPDATED_BY")
+    public String updatedBy;
+
+    @Column(name = "UPDATED_ON", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    public Timestamp updatedOn;
 }
