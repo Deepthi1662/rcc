@@ -1,57 +1,333 @@
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.HashMap;
+package com.kotak.reliability.service.impl;
+
+import com.kotak.reliability.entity.*;
+import com.kotak.reliability.entity.LoanOffUsDetails;
+import com.kotak.reliability.entity.RelationshipDetails;
+import com.kotak.reliability.entity.Transactions;
+import com.kotak.reliability.model.*;
+import com.kotak.reliability.model.Customer360Response.Customer360ResponseBuilder;
+import com.kotak.reliability.repository.*;
+import com.kotak.reliability.service.CustomerService;
+import com.kotak.reliability.util.DateUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
-List<GraphicalSegment> amb = new ArrayList<>();
+import static com.kotak.reliability.constants.Customer360Constants.*;
 
-Map<String, BigDecimal> ambMap = new HashMap<>();
-ambMap.put("Current Month", customerPortfolioTrend.getCURR_MTH_AMB());
-ambMap.put("Last Month", customerPortfolioTrend.getPREV_MTH_AMB());
-ambMap.put("Last Financial Year", customerPortfolioTrend.getLAST_FY_AMB());
-ambMap.put("Current Month Last Year", customerPortfolioTrend.getCURR_MTH_LTYR_AMB());
-ambMap.put("Peak in Last 18 Months", customerPortfolioTrend.getPEAK_AMB());
+@Service
+@Slf4j
+public class CustomerServiceImpl implements CustomerService {
 
-// Formatter to get the month in "MMM'yy" format
-DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM'yy");
+    @Autowired
+    private CustomerProfileRepository customerRepository;
 
-for (Map.Entry<String, BigDecimal> entry : ambMap.entrySet()) {
-    // Get the formatted month string
-    String monthString = getFormattedMonth(entry.getKey(), formatter);
-    
-    amb.add(GraphicalSegment.builder()
-            .xKey(monthString)  // Use the formatted month
-            .balance(entry.getValue())
-            .build());
-}
+    @Autowired
+    private RelationshipDetailsRepository relationshipDetailsRepository;
 
-customer360ResponseBuilder.ambMovement(amb);
+    @Autowired
+    private ServiceActivationStatusRepository serviceActivationStatusRepository;
 
-// Helper method to map each key to its corresponding month
-private String getFormattedMonth(String key, DateTimeFormatter formatter) {
-    LocalDate currentDate = LocalDate.now();  // Get current date
-    LocalDate lastFinancialYearEnd = LocalDate.of(currentDate.getYear() - 1, 3, 31);  // March of last year
+    @Autowired
+    private CustomerPortfolioTrendRepository customerPortfolioTrendRepository;
 
-    switch (key) {
-        case "Current Month":
-            return currentDate.format(formatter);  // e.g., Mar'25
-        case "Last Month":
-            return currentDate.minusMonths(1).format(formatter);  // e.g., Feb'25
-        case "Last Financial Year":
-            return lastFinancialYearEnd.format(formatter);  // e.g., Mar'24 (March of last year)
-        case "Current Month Last Year":
-            return currentDate.minusYears(1).format(formatter);  // e.g., Mar'24 (same month last year)
-        case "Peak in Last 18 Months":
-            return currentDate.minusMonths(6).format(formatter);  // e.g., Nov'24 (6 months ago)
-        default:
-            return currentDate.format(formatter);  // Default to current month
+    @Autowired
+    private LoanOffUsRepository loanOffUsRepository;
+
+    @Autowired
+    private TransactionsRepository transactionsRepository;
+
+    @Autowired
+    private OtherTransactionsRepository otherTransactionsRepository;
+
+    @Override
+    public Customer360Response getCustomerResponse(String crn) {
+        log.info("Getting the customer profile data for crn {}", crn);
+        Optional<CustomerProfile> customerDataOptional = customerRepository.findById(crn);
+        Optional<RelationshipDetails> relationshipDetailsOptional =
+                relationshipDetailsRepository.findById(crn);
+        Optional<ServiceActivationStatus> serviceActivationStatusOptional =
+                serviceActivationStatusRepository.findById(crn);
+        Optional<CustomerPortfolioTrend> customerPortfolioTrendOptional =
+                customerPortfolioTrendRepository.findById(crn);
+        Optional<LoanOffUsDetails> loanOffUsDetailsOptional =
+                loanOffUsRepository.findByCrn(crn);
+
+        Optional<List<Transactions>> transactionsOptional = transactionsRepository.findByCrn(crn);
+        Optional<OtherTransactions> otherTransactionsOptional =
+                otherTransactionsRepository.findByCrn(crn);
+
+        Customer360ResponseBuilder customer360ResponseBuilder =
+                Customer360Response.builder();
+
+        customer360ResponseBuilder.crnNo(crn);
+
+        customerDataOptional.ifPresent(customerProfile ->
+                updateProfileDetails(customer360ResponseBuilder, customerProfile));
+
+        relationshipDetailsOptional.ifPresent(relationshipDetails ->
+                updateRelationshipDetails(customer360ResponseBuilder, relationshipDetails));
+
+        serviceActivationStatusOptional.ifPresent(serviceActivationStatus ->
+                updateServiceActivationDetails(customer360ResponseBuilder, serviceActivationStatus));
+
+        customerPortfolioTrendOptional.ifPresent(customerPortfolioTrend -> {
+            updateCustomerPortfolioTrend(customer360ResponseBuilder, customerPortfolioTrend);
+        });
+
+        loanOffUsDetailsOptional.ifPresent(loanOffUsDetails -> {
+            updateLoanOffUsDetails(customer360ResponseBuilder, loanOffUsDetails);
+        });
+
+        transactionsOptional.ifPresent(transactions -> {
+            updateTransactions(customer360ResponseBuilder, transactions,
+                    otherTransactionsOptional);
+        });
+
+
+        return customer360ResponseBuilder.build();
     }
 
-ambMap.put(CUR_QTR, customerPortfolioTrend.getCurrQtrAqb());
+
+    private void updateTransactions(final Customer360ResponseBuilder customer360ResponseBuilder,
+                                    final List<Transactions> transactions,
+                                    Optional<OtherTransactions> otherTransactionsOptional) {
+
+        List<Transaction> transactionList = new ArrayList<>();
+
+        transactions.forEach(transaction -> {
+            Transaction transactionDetail = Transaction.builder()
+                    .date(transaction.getTransactionDate())
+                    .type(transaction.getTransactionType())
+                    .amount(transaction.getTransactionAmount())
+                    .description(transaction.getTransactionDescription())
+                    .channel(transaction.getTransactionChannel())
+                    .build();
+            transactionList.add(transactionDetail);
+        });
+
+        TransactionDetails transactionDetails = TransactionDetails.builder()
+                .transactionsList(transactionList)
+                .build();
+
+        otherTransactionsOptional.ifPresent(otherTransactions -> {
+            transactionDetails.setTotalCredits(otherTransactions.getTotalCreditsMtd());
+            transactionDetails.setTotalDebits(otherTransactions.getTotalDebitsMtd());
+            transactionDetails.setBranchTransactions(otherTransactions.getBranchMtd());
+            transactionDetails.setCharges(otherTransactions.getChargesMtd());
+            transactionDetails.setAtmRemote(otherTransactions.getAtmRemoteOnUsMtd());
+        });
+
+        customer360ResponseBuilder.transactionDetails(transactionDetails);
+    }
+
+    private void updateLoanOffUsDetails(final Customer360ResponseBuilder customer360ResponseBuilder,
+                                        final LoanOffUsDetails loanOffUsDetailsData) {
+        com.kotak.reliability.model.LoanOffUsDetails loanOffUsDetails =
+                com.kotak.reliability.model.LoanOffUsDetails.builder()
+                        .sanctionLoanOff(loanOffUsDetailsData.getLoanOffUsSanction())
+                        .osLoanOff(loanOffUsDetailsData.getLoanOffUsOs())
+                        .usCCLimitOff(loanOffUsDetailsData.getCcLimitOffUs())
+                        .usMfTransDebitOff(loanOffUsDetailsData.getMfTransDebitOffUs())
+                        .usDematOff(loanOffUsDetailsData.getDematOffUs())
+                        .build();
+
+        customer360ResponseBuilder.loanOffUsDetails(loanOffUsDetails);
+    }
+
+    private void updateCustomerPortfolioTrend(Customer360ResponseBuilder customer360ResponseBuilder,
+                                              CustomerPortfolioTrend customerPortfolioTrend) {
+        updateEopBalance(customer360ResponseBuilder, customerPortfolioTrend);
+        updateAMBalance(customer360ResponseBuilder, customerPortfolioTrend);
+        updateRvMovement(customer360ResponseBuilder, customerPortfolioTrend);
+        updateAQBalance(customer360ResponseBuilder, customerPortfolioTrend);
+    }
+
+    private void updateRedemptionValues(final Customer360ResponseBuilder customer360ResponseBuilder,
+                                        final Customer360 customer360) {
+        List<RedemptionValue> redemptionValues = new ArrayList<>();
+
+        List<String> products = Arrays.asList(
+                "CA AMB", "SA AMB", "TD EOP", "MF AUM", "MF Others",
+                "Insurance", "Sanction @30%", "Demat @30%", "Total RV"
+        );
+
+        products.forEach(product -> {
+            redemptionValues.add(RedemptionValue.builder()
+                    .product(product)
+                    .individualRv(BigDecimal.ZERO)
+                    .currentRv(BigDecimal.TEN)
+                    .build());
+        });
+
+        customer360ResponseBuilder.redemptionValues(redemptionValues);
+    }
+
+    private void updateRvMovement(final Customer360ResponseBuilder customer360ResponseBuilder,
+                                  final CustomerPortfolioTrend customerPortfolioTrend) {
+        List<GraphicalSegment> rv = new ArrayList<>();
+
+        Map<String, BigDecimal> ambMap = new HashMap<>();
+        ambMap.put(CURRENT_MONTH, customerPortfolioTrend.getCurrMonthRv());
+        ambMap.put(LAST_MONTH, customerPortfolioTrend.getPrevMonthRv());
+        ambMap.put(LAST_FINANCIAL_YEAR, customerPortfolioTrend.getLastFyRv());
+        ambMap.put(CURRENT_MONTH_LAST_YEAR, customerPortfolioTrend.getCurrMonthLastYearRv());
+        ambMap.put(PEAK_IN_LAST_18_MONTHS, customerPortfolioTrend.getPeakRv());
+
+        for (Map.Entry<String, BigDecimal> entry : ambMap.entrySet()) {
+            rv.add(GraphicalSegment.builder()
+                    .xKey(DateUtil.getFormattedMonth(entry.getKey()))
+                    .balance(entry.getValue())
+                    .build());
+        }
+
+        customer360ResponseBuilder.rvMovement(rv);
+    }
+
+    private void updateAQBalance(final Customer360ResponseBuilder customer360ResponseBuilder,
+                                 final CustomerPortfolioTrend customerPortfolioTrend) {
+
+        List<GraphicalSegment> aqbData = new ArrayList<>();
+
+        Map<String, BigDecimal> ambMap = new LinkedHashMap<>();
+        ambMap.put(CUR_QTR, customerPortfolioTrend.getCurrQtrAqb());
         ambMap.put(PREV_QTR, customerPortfolioTrend.getPrevQtrAqb());
         ambMap.put(CUR_QTR_IN_LAST_YEAR, customerPortfolioTrend.getCurrQtrLastYearAqb());
         ambMap.put(LAST_QTR_IN_LAST_YEAR, customerPortfolioTrend.getLastQtrLastYearAqb());
+
+        for (Map.Entry<String, BigDecimal> entry : ambMap.entrySet()) {
+            aqbData.add(GraphicalSegment.builder()
+                    .xKey(DateUtil.getFormattedMonth(entry.getKey()))
+                    .balance(entry.getValue())
+                    .build());
+        }
+
+        customer360ResponseBuilder.aqbMovement(aqbData);
+    }
+
+    private void updateAMBalance(final Customer360ResponseBuilder customer360ResponseBuilder,
+                                 final CustomerPortfolioTrend customerPortfolioTrend) {
+
+        List<GraphicalSegment> amb = new ArrayList<>();
+
+        Map<String, BigDecimal> ambMap = new LinkedHashMap<>();
+        ambMap.put(CURRENT_MONTH, customerPortfolioTrend.getCurrMonthAmb());
+        ambMap.put(LAST_MONTH, customerPortfolioTrend.getPrevMonthInCurYearAmb());
+        ambMap.put(LAST_FINANCIAL_YEAR, customerPortfolioTrend.getLastFyAmb());
+        ambMap.put(CURRENT_MONTH_LAST_YEAR, customerPortfolioTrend.getCurMonthInLastYearAmb());
+        ambMap.put(PEAK_IN_LAST_18_MONTHS, customerPortfolioTrend.getPeakAmb());
+
+        for (Map.Entry<String, BigDecimal> entry : ambMap.entrySet()) {
+            amb.add(GraphicalSegment.builder()
+                    .xKey(DateUtil.getFormattedMonth(entry.getKey()))
+                    .balance(entry.getValue())
+                    .build());
+        }
+
+        customer360ResponseBuilder.ambMovement(amb);
+    }
+
+    private void updateEopBalance(final Customer360ResponseBuilder customer360ResponseBuilder,
+                                  final CustomerPortfolioTrend customerPortfolioTrend) {
+
+        List<GraphicalSegment> eopBalance = new ArrayList<>();
+
+        Map<String, BigDecimal> eopMap = new LinkedHashMap<>();
+        eopMap.put(DAY1, customerPortfolioTrend.getEopD1());
+        eopMap.put(DAY2, customerPortfolioTrend.getEopD2());
+        eopMap.put(DAY3, customerPortfolioTrend.getEopD3());
+        eopMap.put(DAY4, customerPortfolioTrend.getEopD4());
+        eopMap.put(DAY5, customerPortfolioTrend.getEopD5());
+        eopMap.put(DAY6, customerPortfolioTrend.getEopD6());
+        eopMap.put(DAY7, customerPortfolioTrend.getEopD7());
+
+        for (Map.Entry<String, BigDecimal> entry : eopMap.entrySet()) {
+            eopBalance.add(GraphicalSegment.builder()
+                    .xKey(entry.getKey())
+                    .balance(entry.getValue())
+                    .build());
+        }
+
+        customer360ResponseBuilder.eopBalance(eopBalance);
+    }
+
+    private void updateServiceActivationDetails(final Customer360ResponseBuilder customer360ResponseBuilder,
+                                                final ServiceActivationStatus serviceActivationStatus) {
+
+        log.info("Mapping Service activation details for customer Id {}",
+                serviceActivationStatus.getCrn());
+
+        Map<String, Pair<String, Integer>> serviceDetailsMap = Map.of(
+                PHONE_BANKING, Pair.of(serviceActivationStatus.getPhnBankingRegistrationFlag(), null),
+                MOBILE_BANKING, Pair.of(serviceActivationStatus.getMbBankngRegistrationFlag(), serviceActivationStatus.getMbBankingLastActive()),
+                NET_BANKING, Pair.of(serviceActivationStatus.getNetBankingRegistrationFlag(), serviceActivationStatus.getNetBankingLastActive()),
+                POS, Pair.of(serviceActivationStatus.getPosRegistrationFlag(), serviceActivationStatus.getPosLastActive()),
+                ATM, Pair.of(serviceActivationStatus.getAtmRegistrationFlag(), serviceActivationStatus.getAtmLastActive()),
+                ONLINE_PAYMENTS, Pair.of(null, null),
+                CREDIT_CARD, Pair.of(serviceActivationStatus.getCcRegistrationFlag(), serviceActivationStatus.getCcLastActive())
+        );
+
+        List<ServiceActivationDetail> serviceActivationDetails = serviceDetailsMap.entrySet().stream()
+                .map(entry -> buildServiceActivationDetail(entry.getKey(),
+                        entry.getValue().getKey(), entry.getValue().getValue()))
+                .collect(Collectors.toList());
+
+        customer360ResponseBuilder.serviceActivationDetails(serviceActivationDetails);
+    }
+
+    private ServiceActivationDetail buildServiceActivationDetail(final String serviceType,
+                                                                 final String isActive,
+                                                                 final Integer activeStatusInDays) {
+        return ServiceActivationDetail.builder()
+                .serviceType(serviceType)
+                .isActive(isActive)
+                .activeStatusInDays(activeStatusInDays)
+                .build();
+    }
+
+
+    private void updateProfileDetails(final Customer360ResponseBuilder customer360ResponseBuilder,
+                                      final CustomerProfile customer360) {
+
+        final ProfileDetails profileDetails = ProfileDetails.builder()
+                .familyId(customer360.getFamilyId())
+                .customerName(customer360.getCustomerName())
+                .dateOfBirth(customer360.getDateOfBirth())
+                .branchName(customer360.getBranchName())
+                .riskProfile(customer360.getRiskProfileCode())
+                .crnCreationDate(customer360.getCrnCreationDate())
+                .city(customer360.getCity())
+                .customerPersona(customer360.getCustomerPersona())
+                .reKycStatus(customer360.getReKycStatus())
+                .build();
+
+        customer360ResponseBuilder.profileDetails(profileDetails);
+    }
+
+    private void updateRelationshipDetails(final Customer360ResponseBuilder customer360ResponseBuilder,
+                                           final RelationshipDetails relationshipDetailsData) {
+
+        final com.kotak.reliability.model.RelationshipDetails relationshipDetails =
+                com.kotak.reliability.model.RelationshipDetails.builder()
+                        .rmName(relationshipDetailsData.getRmName())
+                        .customerLob(relationshipDetailsData.getCustomerLob())
+                        .customerClassification(relationshipDetailsData.getCustomerClassification())
+                        .branchCode(relationshipDetailsData.getBranchCode())
+                        .currentRV(relationshipDetailsData.getCurrentRv())
+                        .familyRV(relationshipDetailsData.getFamilyRv())
+                        .mfPurchaseAmount(relationshipDetailsData.getMfPurchaseAmount3m())
+                        .mfRedemptionAmount(relationshipDetailsData.getMfRedemptionAmount3m())
+                        .phCount(relationshipDetailsData.getPhCount())
+                        .phString(relationshipDetailsData.getPhString())
+                        .serviceManagerName(relationshipDetailsData.getServiceManagerName())
+                        .build();
+
+        customer360ResponseBuilder.relationshipDetails(relationshipDetails);
+    }
+
 }
