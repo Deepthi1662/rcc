@@ -1,72 +1,8 @@
-package com.kotak.reliability.repository;
-
-import com.kotak.reliability.entity.CustomerProfile;
-import com.kotak.reliability.entity.RelationshipDetails;
-import com.kotak.reliability.entity.ServiceActivationStatus;
-import com.kotak.reliability.entity.CustomerPortfolioTrend;
-import com.kotak.reliability.entity.LoanOffUsDetails;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.data.repository.CrudRepository;
-
-import java.util.Optional;
-
-public interface CustomerProfileRepository extends CrudRepository<CustomerProfile, String> {
-
-    // Custom query to fetch customer data and related details using JOINs
-    @Query("SELECT cp, rd, sa, cpt, lou " +
-           "FROM CustomerProfile cp " +
-           "LEFT JOIN RelationshipDetails rd ON cp.crn = rd.crn " +
-           "LEFT JOIN ServiceActivationStatus sa ON cp.crn = sa.crn " +
-           "LEFT JOIN CustomerPortfolioTrend cpt ON cp.crn = cpt.crn " +
-           "LEFT JOIN LoanOffUsDetails lou ON cp.crn = lou.crn " +
-           "WHERE cp.crn = :crn")
-    Optional<Object[]> findCustomerDetailsByCrn(@Param("crn") String crn);
-}
-
-
-
-package com.kotak.reliability.service.impl;
-
-import com.kotak.reliability.entity.*;
-import com.kotak.reliability.repository.CustomerProfileRepository;
-import com.kotak.reliability.service.CustomerService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-@Service
-public class CustomerServiceImpl implements CustomerService {
-
-    @Autowired
-    private CustomerProfileRepository customerProfileRepository;
-
-    @Override
-    public Customer360Response getCustomerResponse(String crn) {
-        Optional<Object[]> customerDataOptional = customerProfileRepository.findCustomerDetailsByCrn(crn);
-
-        if (customerDataOptional.isPresent()) {
-            Object[] customerData = customerDataOptional.get();
-            CustomerProfile customerProfile = (CustomerProfile) customerData[0];
-            RelationshipDetails relationshipDetails = (RelationshipDetails) customerData[1];
-            ServiceActivationStatus serviceActivationStatus = (ServiceActivationStatus) customerData[2];
-            CustomerPortfolioTrend customerPortfolioTrend = (CustomerPortfolioTrend) customerData[3];
-            LoanOffUsDetails loanOffUsDetails = (LoanOffUsDetails) customerData[4];
-
-            // Populate Customer360Response from the entities
-            Customer360ResponseBuilder customer360ResponseBuilder = Customer360Response.builder();
-            customer360ResponseBuilder.crnNo(crn);
-
-            updateProfileDetails(customer360ResponseBuilder, customerProfile);
-            updateRelationshipDetails(customer360ResponseBuilder, relationshipDetails);
-            updateServiceActivationDetails(customer360ResponseBuilder, serviceActivationStatus);
-            updateCustomerPortfolioTrend(customer360ResponseBuilder, customerPortfolioTrend);
-            updateLoanOffUsDetails(customer360ResponseBuilder, loanOffUsDetails);
-
-            return customer360ResponseBuilder.build();
-        } else {
-            return null; // Handle case when data is not found
-        }
-    }
-
-    // Methods like updateProfileDetails, updateRelationshipDetails, etc. remain the same
-}
+@Query(value = "SELECT new com.kotak.reliability.dto.Customer360ResponseDTO(cp, rd, sa, cpt, lou) " +
+               "FROM CustomerProfile cp " +
+               "LEFT JOIN RelationshipDetails rd ON cp.crn = rd.crn " +
+               "LEFT JOIN ServiceActivationStatus sa ON cp.crn = sa.crn " +
+               "LEFT JOIN CustomerPortfolioTrend cpt ON cp.crn = cpt.crn " +
+               "LEFT JOIN LoanOffUsDetails lou ON cp.crn = lou.crn " +
+               "WHERE cp.crn = :crn")
+Optional<Customer360ResponseDTO> findCustomerDetailsByCrn(@Param("crn") String crn);
