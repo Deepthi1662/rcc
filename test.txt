@@ -1,7 +1,20 @@
-public interface CustomerProfileRepository extends CrudRepository<CADetails, String> {
+@Repository
+public interface LiabilitiesRepository extends JpaRepository<CaDetails, String> {
 
-    @Query("SELECT new com.yourpackage.dto.CustomerDetailsDTO(ca, sa) " +
-           "FROM CADetails ca JOIN SaDetails sa ON ca.crn = sa.crn " +
-           "WHERE ca.crn = :crn")
-    List<CustomerDetailsDTO> findCustomerDetailsByCrn(@Param("crn") String crn);
+    @Query("SELECT new com.kotak.reliability.entity.LiabilitiesDTO(ca, sa) " +
+            "FROM CaDetails ca FULL JOIN SaDetails sa ON ca.crn = sa.crn " +
+            "WHERE ca.crn = :crn OR sa.crn = :crn")
+    Optional<LiabilitiesDTO> findLiabilitiesDataByCrn(@Param("crn") String crn);
 }
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class LiabilitiesDTO {
+
+    private List<CaDetails> caDetails;
+    private List<SaDetails> saDetails;
+}
+
+
+Missing constructor for type 'LiabilitiesDTO' [SELECT new com.kotak.reliability.entity.LiabilitiesDTO(ca, sa) FROM CaDetails ca FULL JOIN SaDetails sa ON ca.crn = sa.crn WHERE ca.crn = :crn OR sa.crn = :crn]
