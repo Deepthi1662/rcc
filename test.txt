@@ -1,3 +1,23 @@
+Description:
+
+Parameter 0 of constructor in com.kotak.reliability.service.impl.CustomerServiceImpl required a bean of type 'com.kotak.reliability.repository.LiabilitiesRepository' that could not be found.
+
+The injection point has the following annotations:
+	- @org.springframework.beans.factory.annotation.Autowired(required=true)
+
+
+Action:
+
+Consider defining a bean of type 'com.kotak.reliability.repository.LiabilitiesRepository' in your configuration.
+
+
+Process finished with exit code 1
+
+
+
+
+
+
 SELECT  (
 	(SELECT ca FROM rel.ca_details ca WHERE ca.crn = '98251983'),
     (SELECT sa FROM rel.sa_details sa WHERE sa.crn = '98251983')
