@@ -21,3 +21,22 @@ Caused by: java.lang.IllegalArgumentException: org.hibernate.query.SemanticExcep
 	at org.springframework.data.jpa.repository.query.SimpleJpaQuery.validateQuery(SimpleJpaQuery.java:91) ~[spring-data-jpa-3.4.2.jar:3.4.2]
 	... 63 common frames omitted
 Caused by: org.hibernate.query.SemanticException: Missing constructor for type 'LiabilitiesDTO' [SELECT new com.kotak.reliability.entity.LiabilitiesDTO((SELECT ca FROM CaDetails ca WHERE ca.crn = :crn),(SELECT sa FROM SaDetails sa WHERE sa.crn = :crn))]
+
+
+package com.kotak.reliability.entity;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class LiabilitiesDTO {
+
+    private List<CaDetails> caDetails;
+    private List<SaDetails> saDetails;
+}
