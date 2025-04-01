@@ -1,9 +1,23 @@
-@Query(value = "WITH ca_details_cte AS (" +
-            "   SELECT * FROM CaDetails WHERE crn = :crn" +
-            "), sa_details_cte AS (" +
-            "   SELECT * FROM SaDetails WHERE crn = :crn" +
-            ") " +
-            "SELECT * " +
-            "FROM ca_details_cte ca " +
-            "FULL OUTER JOIN sa_details_cte sa ON ca.crn = sa.crn")
+@Query("SELECT new com.kotak.reliability.entity.LiabilitiesDTO(" +
+            "(SELECT ca FROM CaDetails ca WHERE ca.crn = :crn)," +
+            "(SELECT sa FROM SaDetails sa WHERE sa.crn = :crn))"
+            )
     Optional<LiabilitiesDTO> findLiabilitiesDataByCrn(@Param("crn") String crn);
+
+
+Caused by: java.lang.IllegalArgumentException: org.hibernate.query.SemanticException: Missing constructor for type 'LiabilitiesDTO' [SELECT new com.kotak.reliability.entity.LiabilitiesDTO((SELECT ca FROM CaDetails ca WHERE ca.crn = :crn),(SELECT sa FROM SaDetails sa WHERE sa.crn = :crn))]
+	at org.hibernate.internal.ExceptionConverterImpl.convert(ExceptionConverterImpl.java:143) ~[hibernate-core-6.6.5.Final.jar:6.6.5.Final]
+	at org.hibernate.internal.ExceptionConverterImpl.convert(ExceptionConverterImpl.java:167) ~[hibernate-core-6.6.5.Final.jar:6.6.5.Final]
+	at org.hibernate.internal.ExceptionConverterImpl.convert(ExceptionConverterImpl.java:173) ~[hibernate-core-6.6.5.Final.jar:6.6.5.Final]
+	at org.hibernate.internal.AbstractSharedSessionContract.createQuery(AbstractSharedSessionContract.java:886) ~[hibernate-core-6.6.5.Final.jar:6.6.5.Final]
+	at org.hibernate.internal.AbstractSharedSessionContract.createQuery(AbstractSharedSessionContract.java:796) ~[hibernate-core-6.6.5.Final.jar:6.6.5.Final]
+	at org.hibernate.internal.AbstractSharedSessionContract.createQuery(AbstractSharedSessionContract.java:143) ~[hibernate-core-6.6.5.Final.jar:6.6.5.Final]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569) ~[na:na]
+	at org.springframework.orm.jpa.ExtendedEntityManagerCreator$ExtendedEntityManagerInvocationHandler.invoke(ExtendedEntityManagerCreator.java:364) ~[spring-orm-6.2.2.jar:6.2.2]
+	at jdk.proxy2/jdk.proxy2.$Proxy131.createQuery(Unknown Source) ~[na:na]
+	at org.springframework.data.jpa.repository.query.SimpleJpaQuery.validateQuery(SimpleJpaQuery.java:91) ~[spring-data-jpa-3.4.2.jar:3.4.2]
+	... 63 common frames omitted
+Caused by: org.hibernate.query.SemanticException: Missing constructor for type 'LiabilitiesDTO' [SELECT new com.kotak.reliability.entity.LiabilitiesDTO((SELECT ca FROM CaDetails ca WHERE ca.crn = :crn),(SELECT sa FROM SaDetails sa WHERE sa.crn = :crn))]
