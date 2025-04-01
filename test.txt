@@ -1,3 +1,7 @@
+ org.hibernate.query.SemanticException: Missing constructor for type 'LiabilitiesDTO' [SELECT new com.kotak.reliability.entity.LiabilitiesDTO((SELECT ca FROM CaDetails ca WHERE ca.crn = :crn),(SELECT sa FROM SaDetails sa WHERE sa.crn = :crn))]
+
+
+
 Description:
 
 Parameter 0 of constructor in com.kotak.reliability.service.impl.CustomerServiceImpl required a bean of type 'com.kotak.reliability.repository.LiabilitiesRepository' that could not be found.
