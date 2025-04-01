@@ -1,11 +1,9 @@
 @Query(value = "WITH ca_details_cte AS (" +
-               "   SELECT DISTINCT crn, account_num, total_ca_bal FROM ca_details WHERE crn = :crn" +
-               "), sa_details_cte AS (" +
-               "   SELECT DISTINCT crn, account_num, total_sa_bal FROM sa_details WHERE crn = :crn" +
-               ") " +
-               "SELECT ca.account_num AS ca_account_num, ca.total_ca_bal, " +
-               "       sa.account_num AS sa_account_num, sa.total_sa_bal " +
-               "FROM ca_details_cte ca " +
-               "FULL OUTER JOIN sa_details_cte sa ON ca.crn = sa.crn", 
-       nativeQuery = true)
-LiabilitiesDTO findLiabilitiesDataByCrn(@Param("crn") String crn);
+            "   SELECT * FROM CaDetails WHERE crn = :crn" +
+            "), sa_details_cte AS (" +
+            "   SELECT * FROM SaDetails WHERE crn = :crn" +
+            ") " +
+            "SELECT * " +
+            "FROM ca_details_cte ca " +
+            "FULL OUTER JOIN sa_details_cte sa ON ca.crn = sa.crn")
+    Optional<LiabilitiesDTO> findLiabilitiesDataByCrn(@Param("crn") String crn);
