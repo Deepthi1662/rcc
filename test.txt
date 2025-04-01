@@ -1,20 +1,9 @@
 @Repository
 public interface LiabilitiesRepository extends JpaRepository<CaDetails, String> {
 
-    @Query("SELECT new com.kotak.reliability.entity.LiabilitiesDTO(ca, sa) " +
-            "FROM CaDetails ca FULL JOIN SaDetails sa ON ca.crn = sa.crn " +
-            "WHERE ca.crn = :crn OR sa.crn = :crn")
+    @Query("SELECT new com.kotak.reliability.entity.LiabilitiesDTO( " +
+            "  (SELECT ca FROM CaDetails ca WHERE ca.crn = :crn), " +
+            "  (SELECT sa FROM SaDetails sa WHERE sa.crn = :crn)) " +
+            "FROM Dual")
     Optional<LiabilitiesDTO> findLiabilitiesDataByCrn(@Param("crn") String crn);
 }
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class LiabilitiesDTO {
-
-    private List<CaDetails> caDetails;
-    private List<SaDetails> saDetails;
-}
-
-
-Missing constructor for type 'LiabilitiesDTO' [SELECT new com.kotak.reliability.entity.LiabilitiesDTO(ca, sa) FROM CaDetails ca FULL JOIN SaDetails sa ON ca.crn = sa.crn WHERE ca.crn = :crn OR sa.crn = :crn]
