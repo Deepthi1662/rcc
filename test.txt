@@ -1,3 +1,9 @@
+SELECT  (
+	(SELECT ca FROM rel.ca_details ca WHERE ca.crn = '98251983'),
+    (SELECT sa FROM rel.sa_details sa WHERE sa.crn = '98251983')
+);
+
+
 @Query("SELECT new com.kotak.reliability.entity.LiabilitiesDTO(" +
             "(SELECT ca FROM CaDetails ca WHERE ca.crn = :crn)," +
             "(SELECT sa FROM SaDetails sa WHERE sa.crn = :crn))"
