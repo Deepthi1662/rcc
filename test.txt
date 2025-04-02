@@ -311,34 +311,72 @@ import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+package com.kotak.reliability.entity;
+
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+
 @Entity
 @Table(name = "asset_details", schema = "rel")
 public class AssetDetails {
 
     @Id
-    private String crn;  // CRN is the primary key
+    @Column(name = "CRN", nullable = false)
+    private String crn;
 
+    @Column(name = "MONTH_ID", nullable = false)
     private Integer monthId;
+
+    @Column(name = "TYPE_OF_ASSET", nullable = false)
     private String typeOfAsset;
+
+    @Column(name = "NUMBER_OF_ASSET", nullable = false)
     private Integer numberOfAsset;
+
+    @Column(name = "SANCTIONED_AAMOUNT", nullable = false)
     private BigDecimal sanctionedAmount;
-    private BigDecimal totalOutstandingBal;
+
+    @Column(name = "TOTAL_OUTSTANDING_BAL", nullable = false)
+    private BigDecimal totalOutstandingBalance;
+
+    @Column(name = "ACCOUNT_NUM", nullable = false)
     private String accountNum;
+
+    @Column(name = "INTEREST_RATE", nullable = false)
     private Integer interestRate;
-    private BigDecimal disbursedAmt;
+
+    @Column(name = "DISBURSED_AMT", nullable = false)
+    private BigDecimal disbursedAmount;
+
+    @Column(name = "LEGAL_CHARGES", nullable = false)
     private BigDecimal legalCharges;
+
+    @Column(name = "NUMBER_OF_EMI_OUTSTANDING", nullable = false)
     private Integer numberOfEmiOutstanding;
+
+    @Column(name = "SOH_BALANCE", nullable = false)
     private BigDecimal sohBalance;
+
+    @Column(name = "NUMBER_OF_BOUNCES", nullable = false)
     private Integer numberOfBounces;
 
+    @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
+
+    @Column(name = "CREATED_ON", nullable = false)
     private Timestamp createdOn;
+
+    @Column(name = "UPDATED_BY", nullable = false)
     private String updatedBy;
+
+    @Column(name = "UPDATED_ON", nullable = false)
     private Timestamp updatedOn;
+
+    // Getters and Setters (can be generated with Lombok or manually added)
+
 }
+
 
 INSERT INTO rel.asset_details (
     CRN, MONTH_ID, TYPE_OF_ASSET, NUMBER_OF_ASSET, SANCTIONED_AAMOUNT, TOTAL_OUTSTANDING_BAL,
