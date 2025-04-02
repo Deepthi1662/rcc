@@ -1,6 +1,18 @@
  org.hibernate.query.SemanticException: Missing constructor for type 'LiabilitiesDTO' [SELECT new com.kotak.reliability.entity.LiabilitiesDTO((SELECT ca FROM CaDetails ca WHERE ca.crn = :crn),(SELECT sa FROM SaDetails sa WHERE sa.crn = :crn))]
 
 
+ Map<String, Pair<BigDecimal, BigDecimal>> rvValues = Map.of(
+                CA_AMB, Pair.of(rvRelationshipDetails.getCaAmbFamilyRv(), rvRelationshipDetails.getCaAmbFamilyRv()),
+                SA_AMB, Pair.of(rvRelationshipDetails.getSaAmbIndividualRv(), rvRelationshipDetails.getSaAmbFamilyRv()),
+                TD_EOP, Pair.of(rvRelationshipDetails.getTdEopIndividualRv(), rvRelationshipDetails.getTdEopFamilyRv()),
+                MF_AUM, Pair.of(rvRelationshipDetails.getMfAumIndividualRv(), rvRelationshipDetails.getMfAumFamilyRv()),
+                MF_OTHERS, Pair.of(rvRelationshipDetails.getMfOthersIndividualRv(), rvRelationshipDetails.getMfOthersFamilyRv()),
+                INSURANCE, Pair.of(rvRelationshipDetails.getInsuranceIndividualRv(), rvRelationshipDetails.getInsuranceFamilyRv()),
+                SANCTION_30, Pair.of(rvRelationshipDetails.getSanction30IndividualRv(), rvRelationshipDetails.getSanction30FamilyRv()),
+                DEMAT_30, Pair.of(rvRelationshipDetails.getDemat30IndividualRv(), rvRelationshipDetails.getDemat30FamilyRv())
+        );
+
+
 
 Description:
 
