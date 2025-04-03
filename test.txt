@@ -1,16 +1,23 @@
-import java.time.LocalDate;
+ {
+            "balance": 52818.00,
+            "xkey": "Q1 in this financial year 25-26"
+        },
+        {
+            "balance": 48411.00,
+            "xkey": "Q4 in this financial year 25-26"
+        },
+        {
+            "balance": 29985.00,
+            "xkey": "Q1 in last financial year 24-25"
+        },
+        {
+            "balance": 38252.00,
+            "xkey": "Q0 in last financial year 24-25"
+        }
 
-public class FinancialYearQuarterFormatter {
 
-    // Constants for the key values
-    private static final String CURRENT_FINANCIAL_QUARTER = "Cur Qtr";
-    private static final String PREVIOUS_FINANCIAL_QUARTER = "Prev Qtr";
-    private static final String CURRENT_FINANCIAL_QUARTER_LAST_YEAR = "Cur Qtr Last Year";
-    private static final String PREVIOUS_FINANCIAL_QUARTER_LAST_YEAR = "Prev Qtr Last Year";
 
-    // Method to get the financial year and quarter in "Qx in this financial year YY-YY" format
-    public static String getFormattedFinancialQuarter(String key) {
-        // Get the current date (this will be dynamically used)
+public static String getFormattedQuarter(String key) {
         LocalDate currentDate = LocalDate.now();  // Today's date
 
         // Get the current month and year
@@ -40,28 +47,17 @@ public class FinancialYearQuarterFormatter {
 
         // Get the short year values (last 2 digits of the year)
         String currentYearShort = String.valueOf(currentYear).substring(2);
+        String nextYearShot = String.valueOf(currentYear + 1).substring(2);
         String previousYearShort = String.valueOf(previousYear).substring(2);
 
         // Handle the different cases based on the provided key
         return switch (key) {
-            case CURRENT_FINANCIAL_QUARTER -> formatFinancialQuarter(quarter, currentYearShort, currentYearShort, "this");
-            case PREVIOUS_FINANCIAL_QUARTER -> formatFinancialQuarter(quarter - 1 == 0 ? 4 : quarter - 1, currentYearShort, currentYearShort, "this");
-            case CURRENT_FINANCIAL_QUARTER_LAST_YEAR -> formatFinancialQuarter(quarter, previousYearShort, previousYearShort, "last");
-            case PREVIOUS_FINANCIAL_QUARTER_LAST_YEAR -> formatFinancialQuarter(quarter - 1 == 0 ? 4 : quarter - 1, previousYearShort, previousYearShort, "last");
+            case CUR_QTR -> formatFinancialQuarter(quarter, currentYearShort, nextYearShot, "this");
+            case PREV_QTR -> formatFinancialQuarter(quarter - 1 == 0 ? 4 : quarter - 1, currentYearShort, nextYearShot, "this");
+            case CUR_QTR_IN_LAST_YEAR -> formatFinancialQuarter(quarter, previousYearShort, currentYearShort, "last");
+            case LAST_QTR_IN_LAST_YEAR -> formatFinancialQuarter(quarter - 1, previousYearShort, currentYearShort, "last");
             default -> null;  // Return null if no match
         };
-    }
 
-    // Helper function to format the financial quarter
-    private static String formatFinancialQuarter(int quarter, String startYear, String endYear, String yearType) {
-        return "Q" + quarter + " in " + yearType + " financial year " + startYear + "-" + endYear;
-    }
-
-    public static void main(String[] args) {
-        // Test the method with different keys for today's date
-        System.out.println(getFormattedFinancialQuarter(CURRENT_FINANCIAL_QUARTER));             // Example: "Q1 in this financial year 25-26" for current quarter
-        System.out.println(getFormattedFinancialQuarter(PREVIOUS_FINANCIAL_QUARTER));           // Example: "Q4 in this financial year 24-25" for previous quarter
-        System.out.println(getFormattedFinancialQuarter(CURRENT_FINANCIAL_QUARTER_LAST_YEAR));  // Example: "Q1 in last financial year 24-25" for current quarter last year
-        System.out.println(getFormattedFinancialQuarter(PREVIOUS_FINANCIAL_QUARTER_LAST_YEAR)); // Example: "Q4 in last financial year 23-24" for previous quarter last year
     }
 }
