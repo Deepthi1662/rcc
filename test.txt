@@ -1,23 +1,14 @@
- {
-            "balance": 52818.00,
-            "xkey": "Q1 in this financial year 25-26"
-        },
-        {
-            "balance": 48411.00,
-            "xkey": "Q4 in this financial year 25-26"
-        },
-        {
-            "balance": 29985.00,
-            "xkey": "Q1 in last financial year 24-25"
-        },
-        {
-            "balance": 38252.00,
-            "xkey": "Q0 in last financial year 24-25"
-        }
+import java.time.LocalDate;
 
+public class FinancialQuarterFormatter {
 
+    // Constants for the key values
+    private static final String CUR_QTR = "Cur Qtr";
+    private static final String PREV_QTR = "Prev Qtr";
+    private static final String CUR_QTR_IN_LAST_YEAR = "Cur Qtr Last Year";
+    private static final String LAST_QTR_IN_LAST_YEAR = "Prev Qtr Last Year";
 
-public static String getFormattedQuarter(String key) {
+    public static String getFormattedQuarter(String key) {
         LocalDate currentDate = LocalDate.now();  // Today's date
 
         // Get the current month and year
@@ -47,17 +38,32 @@ public static String getFormattedQuarter(String key) {
 
         // Get the short year values (last 2 digits of the year)
         String currentYearShort = String.valueOf(currentYear).substring(2);
-        String nextYearShot = String.valueOf(currentYear + 1).substring(2);
-        String previousYearShort = String.valueOf(previousYear).substring(2);
+        String nextYearShort = String.valueOf(currentYear + 1).substring(2); // Next year for financial year end
+        String previousYearShort = String.valueOf(previousYear).substring(2); // Previous year for last year's quarter
 
         // Handle the different cases based on the provided key
-        return switch (key) {
-            case CUR_QTR -> formatFinancialQuarter(quarter, currentYearShort, nextYearShot, "this");
-            case PREV_QTR -> formatFinancialQuarter(quarter - 1 == 0 ? 4 : quarter - 1, currentYearShort, nextYearShot, "this");
-            case CUR_QTR_IN_LAST_YEAR -> formatFinancialQuarter(quarter, previousYearShort, currentYearShort, "last");
-            case LAST_QTR_IN_LAST_YEAR -> formatFinancialQuarter(quarter - 1, previousYearShort, currentYearShort, "last");
-            default -> null;  // Return null if no match
-        };
-
+        switch (key) {
+            case CUR_QTR:
+                return formatFinancialQuarter(quarter, currentYearShort, nextYearShort, "this");
+            case PREV_QTR:
+                // Handle transition for previous quarter
+                int prevQuarter = quarter - 1;
+                if (prevQuarter == 0) {
+                    prevQuarter = 4;  // If it's Q1, previous quarter is Q4
+                    currentYear--;  // We need to go to the last financial year
+                }
+                return formatFinancialQuarter(prevQuarter, currentYearShort, nextYearShort, "this");
+            case CUR_QTR_IN_LAST_YEAR:
+                return formatFinancialQuarter(quarter, previousYearShort, currentYearShort, "last");
+            case LAST_QTR_IN_LAST_YEAR:
+                // Handle transition for previous quarter last year
+                int prevQuarterLastYear = quarter - 1;
+                if (prevQuarterLastYear == 0) {
+                    prevQuarterLastYear = 4;  // If it's Q1, previous quarter is Q4
+                    previousYear--;  // Go back to the last financial year
+                }
+                return formatFinancialQuarter(prevQuarterLastYear, previousYearShort, currentYearShort, "last");
+            default:
+                return null;  // Return null if no match
+        }
     }
-}
