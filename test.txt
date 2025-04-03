@@ -1,69 +1,9 @@
-import java.time.LocalDate;
+@Repository
+public interface RelationshipDetailsRepository extends JpaRepository<RelationshipDetails, String> {
 
-public class FinancialQuarterFormatter {
-
-    // Constants for the key values
-    private static final String CUR_QTR = "Cur Qtr";
-    private static final String PREV_QTR = "Prev Qtr";
-    private static final String CUR_QTR_IN_LAST_YEAR = "Cur Qtr Last Year";
-    private static final String LAST_QTR_IN_LAST_YEAR = "Prev Qtr Last Year";
-
-    public static String getFormattedQuarter(String key) {
-        LocalDate currentDate = LocalDate.now();  // Today's date
-
-        // Get the current month and year
-        int currentMonth = currentDate.getMonthValue();
-        int currentYear = currentDate.getYear();
-        int previousYear = currentYear - 1;
-
-        // Determine the financial quarter based on the month
-        int quarter = 0;
-
-        // Financial year starts from April (month 4)
-        if (currentMonth >= 4 && currentMonth <= 6) {
-            quarter = 1;  // Q1: April - June
-        } else if (currentMonth >= 7 && currentMonth <= 9) {
-            quarter = 2;  // Q2: July - September
-        } else if (currentMonth >= 10 && currentMonth <= 12) {
-            quarter = 3;  // Q3: October - December
-        } else if (currentMonth >= 1 && currentMonth <= 3) {
-            quarter = 4;  // Q4: January - March
-        }
-
-        // Adjust financial year if the month is before April
-        if (currentMonth < 4) {
-            currentYear--;
-            previousYear--;
-        }
-
-        // Get the short year values (last 2 digits of the year)
-        String currentYearShort = String.valueOf(currentYear).substring(2);
-        String nextYearShort = String.valueOf(currentYear + 1).substring(2); // Next year for financial year end
-        String previousYearShort = String.valueOf(previousYear).substring(2); // Previous year for last year's quarter
-
-        // Handle the different cases based on the provided key
-        switch (key) {
-            case CUR_QTR:
-                return formatFinancialQuarter(quarter, currentYearShort, nextYearShort, "this");
-            case PREV_QTR:
-                // Handle transition for previous quarter
-                int prevQuarter = quarter - 1;
-                if (prevQuarter == 0) {
-                    prevQuarter = 4;  // If it's Q1, previous quarter is Q4
-                    currentYear--;  // We need to go to the last financial year
-                }
-                return formatFinancialQuarter(prevQuarter, currentYearShort, nextYearShort, "this");
-            case CUR_QTR_IN_LAST_YEAR:
-                return formatFinancialQuarter(quarter, previousYearShort, currentYearShort, "last");
-            case LAST_QTR_IN_LAST_YEAR:
-                // Handle transition for previous quarter last year
-                int prevQuarterLastYear = quarter - 1;
-                if (prevQuarterLastYear == 0) {
-                    prevQuarterLastYear = 4;  // If it's Q1, previous quarter is Q4
-                    previousYear--;  // Go back to the last financial year
-                }
-                return formatFinancialQuarter(prevQuarterLastYear, previousYearShort, currentYearShort, "last");
-            default:
-                return null;  // Return null if no match
-        }
-    }
+    @Query("SELECT new com.example.CustomerProfileRv(rd.currentRv, cp.crn, cp.customerName, cp.creationDate) " +
+           "FROM RelationshipDetails rd " +
+           "JOIN CustomerProfile cp ON rd.crn = cp.crn " +
+           "WHERE cp.familyId = :familyId")
+    List<CustomerProfileRv> findRelationshipDetailsByFamilyId(@Param("familyId") String familyId);
+}
