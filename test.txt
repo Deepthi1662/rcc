@@ -1,15 +1,36 @@
-public static String getFormattedMonth(String key) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(MMM_YY);
+public static String getFormattedFinancialQuarter(String key) {
+        // Get the current date (simulate for March 2025)
+        LocalDate currentDate = LocalDate.of(2025, 3, 10);
 
-        LocalDate currentDate = LocalDate.now();
-        LocalDate lastFinancialYearEnd = LocalDate.of(currentDate.getYear() - 1, 3, 31);  // March of last year
+        // Calculate the financial year starting from April
+        int currentMonth = currentDate.getMonthValue();
+        int currentYear = currentDate.getYear();
+        int previousYear = currentYear - 1;
+        
+        // Determine the financial quarter based on the month
+        int quarter = (currentMonth - 1) / 3 + 1;  // Q1 = 1 (April to June), Q2 = 2 (July to Sept), etc.
+        
+        // Adjust the financial year based on the month
+        if (currentMonth < 4) { // If the month is before April, it's part of the last financial year
+            currentYear--;
+            previousYear--;
+        }
 
+        // Get the short year values (last 2 digits of the year)
+        String currentYearShort = String.valueOf(currentYear).substring(2);
+        String previousYearShort = String.valueOf(previousYear).substring(2);
+
+        // Handle the different cases based on the provided key
         return switch (key) {
-            case CURRENT_MONTH -> currentDate.format(formatter);
-            case LAST_MONTH -> currentDate.minusMonths(1).format(formatter);
-            case LAST_FINANCIAL_YEAR -> lastFinancialYearEnd.format(formatter);
-            case CURRENT_MONTH_LAST_YEAR -> currentDate.minusYears(1).format(formatter);
-            case PEAK_IN_LAST_18_MONTHS -> currentDate.minusMonths(6).format(formatter);
-            default -> null;
+            case CURRENT_FINANCIAL_QUARTER -> formatFinancialQuarter(quarter, currentYearShort, currentYearShort);
+            case PREVIOUS_FINANCIAL_QUARTER -> formatFinancialQuarter(quarter - 1 == 0 ? 4 : quarter - 1, previousYearShort, currentYearShort);
+            case CURRENT_FINANCIAL_QUARTER_LAST_YEAR -> formatFinancialQuarter(quarter, previousYearShort, previousYearShort);
+            case PREVIOUS_FINANCIAL_QUARTER_LAST_YEAR -> formatFinancialQuarter(quarter - 1 == 0 ? 4 : quarter - 1, previousYearShort, previousYearShort);
+            default -> null;  // Return null if no match
         };
+    }
+
+    // Helper function to format the financial quarter
+    private static String formatFinancialQuarter(int quarter, String startYear, String endYear) {
+        return "Q" + quarter + "-" + startYear + "-" + endYear;
     }
