@@ -1,18 +1,15 @@
-  public static String convertToMonthYearFormat(BigDecimal value) {
-        // Extract the year and month from the BigDecimal (assuming format yyyyMM)
-        int yearMonth = value.intValue();  // Convert BigDecimal to int
-        int year = yearMonth / 100;        // Get the year (first 4 digits)
-        int month = yearMonth % 100;       // Get the month (last 2 digits)
+public static String getFormattedMonth(String key) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(MMM_YY);
 
-        // Use Calendar to format the month abbreviation
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, year);
-        calendar.set(Calendar.MONTH, month - 1);  // Month is 0-based in Calendar
-        String monthAbbreviation = new SimpleDateFormat("MMM").format(calendar.getTime());
+        LocalDate currentDate = LocalDate.now();
+        LocalDate lastFinancialYearEnd = LocalDate.of(currentDate.getYear() - 1, 3, 31);  // March of last year
 
-        // Get the last 2 digits of the year
-        String yearShort = String.valueOf(year).substring(2);
-
-        // Return the formatted string in the desired format (e.g., Jul'25)
-        return monthAbbreviation + "'" + yearShort;
+        return switch (key) {
+            case CURRENT_MONTH -> currentDate.format(formatter);
+            case LAST_MONTH -> currentDate.minusMonths(1).format(formatter);
+            case LAST_FINANCIAL_YEAR -> lastFinancialYearEnd.format(formatter);
+            case CURRENT_MONTH_LAST_YEAR -> currentDate.minusYears(1).format(formatter);
+            case PEAK_IN_LAST_18_MONTHS -> currentDate.minusMonths(6).format(formatter);
+            default -> null;
+        };
     }
