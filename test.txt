@@ -1,9 +1,16 @@
-@Repository
-public interface RelationshipDetailsRepository extends JpaRepository<RelationshipDetails, String> {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CustomerProfileWithRv {
 
-    @Query("SELECT new com.example.CustomerProfileRv(rd.currentRv, cp.crn, cp.customerName, cp.creationDate) " +
-           "FROM RelationshipDetails rd " +
-           "JOIN CustomerProfile cp ON rd.crn = cp.crn " +
-           "WHERE cp.familyId = :familyId")
-    List<CustomerProfileRv> findRelationshipDetailsByFamilyId(@Param("familyId") String familyId);
+    private String crn;
+    private String customerName;
+    private Date creationDate;
+    private BigDecimal currentRv;
 }
+
+@Query("SELECT new com.example.CustomerProfileRv(cp.crn, cp.customer_name, cp.creation_date, rd.current_rv)" +
+            "FROM CustomerProfile cp " +
+            "LEFT JOIN RelationshipDetails rd ON rd.crn = cp.crn " +
+            "WHERE cp.familyId = :familyId")
+    Optional<List<CustomerProfileWithRv>> findCustomerDetailsFor(@Param("familyId") String familyId);
