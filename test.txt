@@ -1,70 +1,18 @@
-CREATE TABLE rel.service_requests (
-        SR_ID VARCHAR(20) PRIMARY KEY,
-        CRN VARCHAR(20) NOT NULL,
-        MONTH_ID INTEGER NOT NULL,
-        SR_TICKET_ID VARCHAR(50) NOT NULL,
-        TITLE VARCHAR(200) NOT NULL,
-        SUB_TYPE VARCHAR(100) NOT NULL,
-        NATURE VARCHAR(10) NOT NULL,
-        PRIORITY VARCHAR(10) NOT NULL,
-        STATUS VARCHAR(10) NOT NULL,
-        CHANNEL VARCHAR(20) NOT NULL,
-        SR_CREATION_DATE TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        CREATED_BY VARCHAR(100) NOT NULL,
-        CREATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        UPDATED_BY VARCHAR(100) NOT NULL,
-        UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
+  public static String convertToMonthYearFormat(BigDecimal value) {
+        // Extract the year and month from the BigDecimal (assuming format yyyyMM)
+        int yearMonth = value.intValue();  // Convert BigDecimal to int
+        int year = yearMonth / 100;        // Get the year (first 4 digits)
+        int month = yearMonth % 100;       // Get the month (last 2 digits)
 
+        // Use Calendar to format the month abbreviation
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, month - 1);  // Month is 0-based in Calendar
+        String monthAbbreviation = new SimpleDateFormat("MMM").format(calendar.getTime());
 
-CREATE TABLE rel.latest_transactions (
-    id INTEGER PRIMARY KEY,
-    crn VARCHAR(20) NOT NULL,
-    transaction_date TIMESTAMP NOT NULL,
-    transaction_channel VARCHAR(50),
-    transaction_description TEXT,
-    transaction_amount DECIMAL(20,2) NOT NULL DEFAULT 0.00,
-    transaction_type VARCHAR(10) NOT NULL,
-    created_by VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPDATED_BY VARCHAR(100) NOT NULL,
-    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ;
+        // Get the last 2 digits of the year
+        String yearShort = String.valueOf(year).substring(2);
 
-
--- Transaction Other Details
-CREATE TABLE rel.transactions_other_details_mtd (
-    crn VARCHAR(20) NOT NULL,
-    total_credits_mtd INTEGER,
-    total_debits_mtd INTEGER,
-    charges_mtd INTEGER,
-    atm_remote_on_us_mtd INTEGER,
-    branch_mtd INTEGER,
-    created_by VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPDATED_BY VARCHAR(100) NOT NULL,
-    UPDATED_ON TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-
-INSERT INTO rel.service_requests (SR_ID, CRN, MONTH_ID, SR_TICKET_ID, TITLE, SUB_TYPE, NATURE, PRIORITY, STATUS, CHANNEL, SR_CREATION_DATE, CREATED_BY, CREATED_ON, UPDATED_BY, UPDATED_ON)
-VALUES
-('SR1001', 'CRN12345', 4, 'SR_TICKET_001', 'Issue with Account Access', 'Technical', 'Urgent', 'High', 'Open', 'Phone', '2025-04-01 10:00:00', 'John Doe', '2025-04-01 10:00:00', 'Jane Smith', '2025-04-01 10:00:00'),
-('SR1002', 'CRN67890', 4, 'SR_TICKET_002', 'Billing Discrepancy', 'Billing', 'Normal', 'Medium', 'In Progress', 'Email', '2025-04-02 12:15:00', 'Emily White', '2025-04-02 12:15:00', 'Mark Brown', '2025-04-02 12:15:00'),
-('SR1003', 'CRN54321', 4, 'SR_TICKET_003', 'ATM Transaction Error', 'ATM', 'Critical', 'High', 'Closed', 'ATM', '2025-04-03 09:30:00', 'George Clark', '2025-04-03 09:30:00', 'Lily Green', '2025-04-03 09:30:00');
-
-
-
-INSERT INTO rel.latest_transactions (id, crn, transaction_date, transaction_channel, transaction_description, transaction_amount, transaction_type, created_by, created_at, UPDATED_BY, UPDATED_ON)
-VALUES
-(1, 'CRN12345', '2025-04-01 10:05:00', 'Online', 'Purchase of electronic goods', 150.00, 'Debit', 'John Doe', '2025-04-01 10:05:00', 'Jane Smith', '2025-04-01 10:05:00'),
-(2, 'CRN67890', '2025-04-02 12:20:00', 'Mobile App', 'Bill payment to XYZ Company', 75.50, 'Credit', 'Emily White', '2025-04-02 12:20:00', 'Mark Brown', '2025-04-02 12:20:00'),
-(3, 'CRN54321', '2025-04-03 09:35:00', 'ATM', 'Cash withdrawal', 200.00, 'Debit', 'George Clark', '2025-04-03 09:35:00', 'Lily Green', '2025-04-03 09:35:00');
-
-
-INSERT INTO rel.transactions_other_details_mtd (crn, total_credits_mtd, total_debits_mtd, charges_mtd, atm_remote_on_us_mtd, branch_mtd, created_by, created_at, UPDATED_BY, UPDATED_ON)
-VALUES
-('CRN12345', 5, 3, 10, 2, 1, 'John Doe', '2025-04-01 10:10:00', 'Jane Smith', '2025-04-01 10:10:00'),
-('CRN67890', 7, 4, 5, 1, 2, 'Emily White', '2025-04-02 12:25:00', 'Mark Brown', '2025-04-02 12:25:00'),
-('CRN54321', 6, 2, 3, 3, 1, 'George Clark', '2025-04-03 09:40:00', 'Lily Green', '2025-04-03 09:40:00');
-
+        // Return the formatted string in the desired format (e.g., Jul'25)
+        return monthAbbreviation + "'" + yearShort;
+    }
